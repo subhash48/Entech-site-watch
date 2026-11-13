@@ -65,7 +65,7 @@ export function OverviewView() {
               ))}
               {validation.warnings.map((w) => <li key={w}>{w}</li>)}
             </ul>
-            <Link href="/readings?status=MISSING_DATA" className="text-xs font-medium text-primary hover:underline">Review missing data</Link>
+            <Link href="/sensors?status=MISSING_DATA" className="text-xs font-medium text-primary hover:underline">Review missing data</Link>
           </div>
         </div>
       )}

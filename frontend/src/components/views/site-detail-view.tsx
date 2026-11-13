@@ -43,7 +43,7 @@ export function SiteDetailView() {
       <PageHeader
         title={site.site_name}
         description={<span className="inline-flex items-center gap-2"><span className="font-mono">{site.site_id}</span><SiteStatusBadge status={site.status} /></span>}
-        actions={<Button variant="outline" size="sm" asChild><Link href={`/readings?site_id=${site.site_id}`}>Open in Sensor Readings <ArrowRight /></Link></Button>}
+        actions={<Button variant="outline" size="sm" asChild><Link href={`/sensors?site_id=${site.site_id}`}>Open in Sensor Readings <ArrowRight /></Link></Button>}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { TableSkeleton } from "@/components/states";
 import { ReadingsView } from "@/components/views/readings-view";
 
-export const metadata: Metadata = { title: "Sensor readings" };
+export const metadata: Metadata = { title: "Sensors" };
 
 export default function Page() {
   return (

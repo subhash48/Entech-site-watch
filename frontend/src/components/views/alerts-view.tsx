@@ -36,7 +36,7 @@ export function AlertsView() {
           <p>
             <span className="font-medium">Missing data is not an exceedance.</span>{" "}
             <span className="text-muted-foreground">{missing} reading{missing === 1 ? "" : "s"} could not be evaluated and {missing === 1 ? "is" : "are"} excluded here.</span>{" "}
-            <Link href="/readings?status=MISSING_DATA" className="font-medium text-primary hover:underline">Review missing data</Link>
+            <Link href="/sensors?status=MISSING_DATA" className="font-medium text-primary hover:underline">Review missing data</Link>
           </p>
         </div>
       )}

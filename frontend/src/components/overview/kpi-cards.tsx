@@ -23,9 +23,9 @@ export function KpiCards({ totals }: { totals: Totals }) {
     { id: "exceedances", label: "Exceedances", value: totals.exceeded_readings, hint: "readings above limit",
       href: "/alerts", icon: TriangleAlert, tone: totals.exceeded_readings ? "exceeded" : "normal" },
     { id: "normal", label: "Normal readings", value: totals.normal_readings,
-      hint: `of ${totals.total_readings} readings`, href: "/readings?status=NORMAL", icon: CheckCircle2, tone: "normal" },
+      hint: `of ${totals.total_readings} readings`, href: "/sensors?status=NORMAL", icon: CheckCircle2, tone: "normal" },
     { id: "missing", label: "Missing readings", value: totals.missing_data_readings, hint: "not evaluated, never zero",
-      href: "/readings?status=MISSING_DATA", icon: CircleDashed, tone: totals.missing_data_readings ? "missing" : undefined },
+      href: "/sensors?status=MISSING_DATA", icon: CircleDashed, tone: totals.missing_data_readings ? "missing" : undefined },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
