@@ -1,0 +1,5 @@
+{
+  "vibration_ppv": { "limit": 0.5, "unit": "in/s" },
+  "noise_dba": { "limit": 85, "unit": "dBA" },
+  "dust_pm10": { "limit": 150, "unit": "ug/m3" }
+}
