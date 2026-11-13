@@ -38,6 +38,16 @@ Missing data is kept separate from exceedances. A blank value is stored as null 
 
 For an exceedance, `exceeded_by` is `value - limit` in the sensor's unit, and `exceeded_by_pct` is `exceeded_by / limit × 100`, rounded to one decimal place.
 
+## Alert severity
+
+The dashboard labels each exceedance with a display severity. It is derived only from how far the reading was above its configured limit:
+
+- **High**: 20% or more over the limit (or any excess when the limit is 0).
+- **Medium**: at least 5% and less than 20% over the limit.
+- **Low**: less than 5% over the limit.
+
+Severity is a display priority for triage. It is not a regulatory classification. With the supplied data, the vibration reading of 0.62 in/s at 125 Broad St (24% over) is High, and the noise reading of 88 dBA at 125 Broad St (3.5% over) is Low.
+
 ## Interpreting exceedances
 
 An exceedance means a reading was above a monitoring threshold configured for this project. It does not by itself mean a regulatory, legal or permit violation. Whether any requirement was breached depends on the applicable rules, averaging periods and conditions, which this application does not evaluate.

@@ -23,11 +23,23 @@ def site_summary(site: Site, readings: list[Reading]) -> SiteSummary:
     )
 
 
+HIGH_PCT, MEDIUM_PCT = 20.0, 5.0
+
+
+def severity_for(pct: float | None) -> str:
+    """Display priority only: high >= 20% over the limit, medium >= 5%, low < 5%.
+    With a limit of 0 any excess is treated as high. Not a regulatory classification."""
+    if pct is None or pct >= HIGH_PCT:
+        return "high"
+    return "medium" if pct >= MEDIUM_PCT else "low"
+
+
 def to_exceedance(r: Reading) -> Exceedance:
     pct = round(r.exceeded_by / r.threshold * 100, 1) if r.threshold else None
     return Exceedance(reading_id=r.id, site_id=r.site_id, site_name=r.site_name, sensor=r.sensor,
                       sensor_label=r.sensor_label, timestamp=r.timestamp, value=r.value,
-                      threshold=r.threshold, unit=r.unit, exceeded_by=r.exceeded_by, exceeded_by_pct=pct)
+                      threshold=r.threshold, unit=r.unit, exceeded_by=r.exceeded_by, exceeded_by_pct=pct,
+                      severity=severity_for(pct))
 
 
 def totals(sites: list[SiteSummary], readings: list[Reading]) -> Totals:

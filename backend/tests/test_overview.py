@@ -64,3 +64,29 @@ def test_response_schemas_documented(client):
                  "/api/exceedances", "/api/summary", "/api/chat"]:
         assert path in spec["paths"], path
     assert "ErrorResponse" in spec["components"]["schemas"]
+
+
+def test_overview_filters_narrow_every_count(client):
+    s1 = client.get("/api/overview", params={"site_id": "S1"}).json()
+    assert [s["site_id"] for s in s1["sites"]] == ["S1"]
+    assert s1["totals"] == {"total_sites": 1, "total_readings": 5, "normal_readings": 3, "exceeded_readings": 2,
+                            "missing_data_readings": 0, "sites_with_alerts": 1}
+    noise = client.get("/api/overview", params={"sensor": "noise"}).json()
+    assert [b["sensor"] for b in noise["sensor_breakdown"]] == ["noise_dba"]
+    assert noise["totals"]["exceeded_readings"] == 2 and noise["totals"]["sites_with_alerts"] == 2
+    missing = client.get("/api/overview", params={"status": "MISSING_DATA"}).json()
+    assert missing["totals"]["total_readings"] == 1 and missing["recent_alerts"] == []
+    window = client.get("/api/overview", params={"start": "2026-11-02T10:00:00", "end": "2026-11-02T11:30:00"}).json()
+    assert window["totals"]["total_readings"] == 5 and window["totals"]["exceeded_readings"] == 3
+    assert window["available_dates"] == ["2026-11-02"]  # options always come from the full dataset
+    empty = client.get("/api/overview", params={"start": "2026-11-03T00:00:00"}).json()
+    assert empty["totals"]["total_readings"] == 0 and empty["period_start"] is None
+    assert client.get("/api/overview", params={"site_id": "NOPE"}).status_code == 404
+
+
+def test_alert_severity_rule(client):
+    got = {(e["site_id"], e["sensor"]): (e["exceeded_by_pct"], e["severity"])
+           for e in client.get("/api/exceedances").json()}
+    assert got == {("S1", "vibration_ppv"): (24.0, "high"), ("S2", "dust_pm10"): (14.0, "medium"),
+                   ("S3", "vibration_ppv"): (10.0, "medium"), ("S3", "noise_dba"): (7.1, "medium"),
+                   ("S1", "noise_dba"): (3.5, "low")}

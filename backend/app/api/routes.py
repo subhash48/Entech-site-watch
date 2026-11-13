@@ -55,9 +55,14 @@ def health(ds: DatasetDep, settings: SettingsDep):
 
 
 @router.get("/api/overview", response_model=Overview, tags=["overview"])
-def overview(ds: DatasetDep):
-    """Dashboard data: totals, site statuses, sensor breakdown, trend series, recent alerts, validation."""
-    return build_overview(ds)
+def overview(
+    ds: DatasetDep, site_id: SiteQ = None, sensor: SensorQ = None,
+    status: Annotated[ReadingStatus | None, Query(description="NORMAL, EXCEEDED or MISSING_DATA")] = None,
+    start: StartQ = None, end: EndQ = None,
+):
+    """Dashboard data: totals, site statuses, sensor breakdown, trend series, recent alerts and validation.
+    Optional filters narrow every count, exactly like /api/readings."""
+    return build_overview(ds, site_id=site_id, sensor=sensor, status=status, start=start, end=end)
 
 
 @router.get("/api/sites", response_model=list[SiteSummary], tags=["sites"])

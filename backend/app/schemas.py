@@ -1,5 +1,5 @@
 """API response models."""
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 from typing import Any, Generic, Literal, TypeVar
 
@@ -90,6 +90,9 @@ class Exceedance(BaseModel):
     unit: str
     exceeded_by: float
     exceeded_by_pct: float | None = Field(description="Percent over the limit; null when the limit is 0")
+    severity: Literal["high", "medium", "low"] = Field(
+        description="Display priority derived from percent over the limit: high >= 20%, medium >= 5%, low < 5%. "
+                    "Not a regulatory classification.")
 
 
 class SiteDetail(SiteSummary):
@@ -151,6 +154,7 @@ class Overview(BaseModel):
     data_source: DataSource
     period_start: datetime | None
     period_end: datetime | None
+    available_dates: list[date] = Field(description="Every date with readings in the full dataset (filter options)")
     totals: "Totals"
     sites: list[SiteSummary]
     sensor_breakdown: list[SensorBreakdown]
