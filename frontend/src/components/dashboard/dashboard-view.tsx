@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ChatPanel } from "@/components/chat/chat-panel";
 import { AlertsCard } from "@/components/dashboard/alerts-card";
 import { EMPTY_FILTERS, FilterBar, type DashboardFilters } from "@/components/dashboard/filter-bar";
 import { KpiRow } from "@/components/dashboard/kpi-row";
@@ -62,6 +63,9 @@ export function DashboardView() {
           </div>
           <div className="grid gap-5 xl:grid-cols-2">
             <TrendsCard trends={overview.trends} />
+            <section className="flex h-[30rem] min-w-0 flex-col rounded-2xl border bg-card shadow-card xl:h-[25rem]" data-testid="assistant-card">
+              <ChatPanel className="h-full" />
+            </section>
           </div>
         </div>
       )}

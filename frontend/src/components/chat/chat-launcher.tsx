@@ -7,11 +7,11 @@ import { ChatPanel } from "@/components/chat/chat-panel";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
-/** Floating "Ask SiteWatch AI" button with a slide-over chat panel (hidden on the AI Assistant page). */
+/** Floating "Ask SiteWatch AI" button with a slide-over chat panel. Hidden where the assistant is already on the page. */
 export function ChatLauncher() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  if (pathname === "/assistant") return null;
+  if (pathname === "/" || pathname === "/assistant") return null;
 
   return (
     <>

@@ -1,12 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Database, FileText, KeyRound, RotateCcw, Sparkles, Trash2, TriangleAlert } from "lucide-react";
+import {
+  ChartColumn, ChevronRight, FileText, Info, KeyRound, Layers, RotateCcw, SendHorizontal, Sparkles, Trash2,
+  TriangleAlert, UserRound,
+} from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import { Markdown } from "@/components/chat/markdown";
 import { useChat, type UIMessage } from "@/components/chat/chat-provider";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import type { ChatSource } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const SUGGESTED_PROMPTS = [
@@ -17,68 +21,94 @@ export const SUGGESTED_PROMPTS = [
   "Summarize the monitoring results for a client.",
 ];
 
+/** Where each cited data file can be inspected in the app. */
+const SOURCE_LINKS: Record<string, string> = { "readings.csv": "/sensors", "thresholds.json": "/settings" };
+
 function SetupNotice({ message }: { message: string }) {
   return (
-    <div data-testid="ai-setup" className="m-4 space-y-3 rounded-lg border border-missing-border bg-missing-soft/60 p-4 text-sm">
-      <div className="flex items-center gap-2 font-semibold">
-        <KeyRound className="size-4 text-missing" /> SiteWatch AI is not configured
-      </div>
+    <div data-testid="ai-setup" className="space-y-2.5 rounded-xl border border-missing-border bg-missing-soft/60 p-4 text-sm">
+      <p className="flex items-center gap-2 font-semibold"><KeyRound className="size-4 text-missing" /> SiteWatch AI is not configured</p>
       <p className="text-muted-foreground">{message}</p>
       <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
         <li>Copy <code className="font-mono text-xs">backend/.env.example</code> to <code className="font-mono text-xs">backend/.env</code>.</li>
         <li>Set <code className="font-mono text-xs">ANTHROPIC_API_KEY</code> to your Anthropic API key.</li>
         <li>Restart the backend, then reload this page.</li>
       </ol>
-      <p className="text-xs text-muted-foreground">The key stays on the server. The browser never receives it. The rest of the dashboard works without it.</p>
+      <p className="text-xs text-muted-foreground">The key stays on the server and is never sent to the browser. The rest of the dashboard works without it.</p>
     </div>
   );
 }
 
-function Sources({ message }: { message: UIMessage }) {
-  const sources = message.response?.sources ?? [];
+function SourceChips({ sources }: { sources: ChatSource[] }) {
   if (!sources.length) return null;
+  const data = sources.filter((s) => s.type === "data");
+  const docs = sources.filter((s) => s.type === "doc");
+  const chip = "inline-flex max-w-full items-center gap-1.5 rounded-lg border bg-card px-2.5 py-1 text-xs font-medium text-foreground/80";
   return (
-    <div className="flex flex-wrap gap-1.5 pt-1" aria-label="Sources">
-      {sources.map((s) => (
-        <span key={`${s.type}:${s.name}`} className="inline-flex max-w-full items-center gap-1 rounded-md border bg-muted/50 px-1.5 py-0.5 text-[11px] text-muted-foreground">
-          {s.type === "data" ? <Database className="size-3 shrink-0" /> : <FileText className="size-3 shrink-0" />}
-          <span className="truncate">{s.name}</span>
+    <div className="flex flex-wrap gap-1.5 pt-2.5" aria-label="Sources">
+      {data.length > 0 && (
+        <Link href={SOURCE_LINKS[data[0].name] ?? "/sensors"} className={cn(chip, "hover:border-primary/40")}>
+          <ChartColumn className="size-3.5 shrink-0" />
+          <span className="truncate">Source: {data.map((s) => s.name).join(", ")}</span>
+          <ChevronRight className="size-3.5 shrink-0" />
+        </Link>
+      )}
+      {docs.map((s) => (
+        <span key={s.name} className={chip}>
+          <FileText className="size-3.5 shrink-0" /><span className="truncate">{s.name}</span>
         </span>
       ))}
     </div>
   );
 }
 
-function Bubble({ message, onRetry }: { message: UIMessage; onRetry: () => void }) {
+function AssistantAvatar() {
+  return (
+    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
+      <Sparkles className="size-[1.1rem]" />
+    </span>
+  );
+}
+
+function Message({ message, onRetry }: { message: UIMessage; onRetry: () => void }) {
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-3.5 py-2 text-sm whitespace-pre-wrap text-primary-foreground">
+      <div className="flex items-start justify-end gap-2.5">
+        <div className="max-w-[80%] rounded-2xl rounded-tr-md bg-[#e6eefc] px-4 py-2.5 text-sm whitespace-pre-wrap text-foreground dark:bg-[#1c2d55]">
           {message.content}
         </div>
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full border bg-card text-foreground">
+          <UserRound className="size-[1.1rem]" />
+        </span>
       </div>
     );
   }
   if (message.error) {
     return (
-      <div role="alert" className="flex items-start gap-2 rounded-lg border border-exceeded-border bg-exceeded-soft/60 p-3 text-sm">
-        <TriangleAlert className="mt-0.5 size-4 shrink-0 text-exceeded" />
-        <div className="flex-1 space-y-2">
-          <p>{message.error}</p>
-          <Button size="xs" variant="outline" onClick={onRetry}><RotateCcw /> Retry</Button>
+      <div className="flex items-start gap-3">
+        <AssistantAvatar />
+        <div role="alert" className="flex-1 space-y-2 rounded-2xl rounded-tl-md border border-exceeded-border bg-exceeded-soft/60 px-4 py-3 text-sm">
+          <p className="flex items-start gap-2"><TriangleAlert className="mt-0.5 size-4 shrink-0 text-exceeded" />{message.error}</p>
+          <button type="button" onClick={onRetry}
+            className="inline-flex items-center gap-1 rounded-md border bg-card px-2 py-1 text-xs font-medium hover:bg-muted">
+            <RotateCcw className="size-3" /> Retry
+          </button>
         </div>
       </div>
     );
   }
   const refused = message.response?.refused;
   return (
-    <div data-testid="assistant-message" className="group space-y-1.5">
-      <div className={cn("rounded-2xl rounded-bl-sm border bg-card px-3.5 py-2.5", refused && "bg-muted/40 text-muted-foreground")}>
-        <Markdown>{message.content}</Markdown>
-        <Sources message={message} />
-      </div>
-      <div className="flex items-center gap-1 opacity-70 transition-opacity group-hover:opacity-100">
-        <CopyButton text={message.content} label="Copy response" size="xs" variant="ghost" />
+    <div className="group flex items-start gap-3" data-testid="assistant-message">
+      <AssistantAvatar />
+      <div className="min-w-0 flex-1">
+        <div className={cn("rounded-2xl rounded-tl-md bg-muted/80 px-4 py-3", refused && "text-muted-foreground")}>
+          <Markdown>{message.content}</Markdown>
+          <SourceChips sources={message.response?.sources ?? []} />
+        </div>
+        <div className="mt-1 opacity-70 transition-opacity group-hover:opacity-100">
+          <CopyButton text={message.content} label="Copy response" size="xs" variant="ghost" />
+        </div>
       </div>
     </div>
   );
@@ -87,12 +117,14 @@ function Bubble({ message, onRetry }: { message: UIMessage; onRetry: () => void 
 export function ChatPanel({ className, autoFocus }: { className?: string; autoFocus?: boolean }) {
   const { messages, pending, status, statusError, send, retry, clear } = useChat();
   const [draft, setDraft] = useState("");
-  const endRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
   const notConfigured = status && !status.configured;
   const disabled = pending || !!notConfigured || !!statusError;
 
+  // Keep the newest message in view without scrolling the whole page.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const el = logRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages.length, pending]);
 
   const submit = (text = draft) => {
@@ -103,73 +135,72 @@ export function ChatPanel({ className, autoFocus }: { className?: string; autoFo
 
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
-      <div className="flex items-center gap-2 border-b px-4 py-3">
-        <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-          <Sparkles className="size-4" />
+      <div className="flex items-start gap-3 px-5 pt-5 pb-3">
+        <Sparkles className="mt-0.5 size-7 shrink-0 text-primary" strokeWidth={1.7} />
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg leading-tight font-bold tracking-tight">Project AI Assistant</h2>
+          <p className="truncate text-sm text-muted-foreground">Ask questions about your SiteWatch project data.</p>
         </div>
-        <div className="min-w-0 flex-1 leading-tight">
-          <p className="text-sm font-semibold">SiteWatch AI</p>
-          <p className="truncate text-xs text-muted-foreground">Answers from this project&apos;s data and documentation</p>
-        </div>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+          <Layers className="size-3.5" /> Agentic RAG
+        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" aria-label="How the assistant works" className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground">
+              <Info className="size-[1.15rem]" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            Answers come from read-only tools over readings.csv and thresholds.json and from a search of the project
+            docs, with sources. The data is static, not live. Unrelated questions are declined.
+          </TooltipContent>
+        </Tooltip>
         {messages.length > 0 && (
-          <Button variant="ghost" size="icon-sm" onClick={clear} aria-label="Clear conversation">
-            <Trash2 />
-          </Button>
+          <button type="button" onClick={clear} aria-label="Clear conversation" className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground">
+            <Trash2 className="size-[1.1rem]" />
+          </button>
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto" data-testid="chat-log" aria-live="polite">
+      <div ref={logRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-2" data-testid="chat-log" aria-live="polite">
         {notConfigured && <SetupNotice message={status.message} />}
         {statusError && (
-          <p role="alert" className="m-4 rounded-lg border border-exceeded-border bg-exceeded-soft/60 p-3 text-sm">{statusError}</p>
+          <p role="alert" className="rounded-xl border border-exceeded-border bg-exceeded-soft/60 p-3 text-sm">{statusError}</p>
         )}
-        {messages.length === 0 && !notConfigured && !statusError ? (
-          <div className="space-y-4 p-4">
+        {messages.length === 0 && !notConfigured && !statusError && (
+          <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Ask about sites, readings, thresholds, exceedances, missing data, or how SiteWatch works. Answers are
-              grounded in the project&apos;s files, with sources.
+              Grounded in this project&apos;s data and documentation. Try one of these:
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-2">
               {SUGGESTED_PROMPTS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => submit(p)}
-                  className="rounded-lg border bg-card px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-accent disabled:opacity-50"
-                >
+                <button key={p} type="button" disabled={disabled} onClick={() => submit(p)}
+                  className="rounded-full border bg-card px-3 py-1.5 text-left text-xs font-medium transition-colors hover:border-primary/40 hover:bg-accent disabled:opacity-50">
                   {p}
                 </button>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="space-y-4 p-4">
-            {messages.map((m) => <Bubble key={m.id} message={m} onRetry={retry} />)}
-            {pending && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="chat-pending">
-                <span className="flex gap-1">
-                  {[0, 150, 300].map((d) => (
-                    <span key={d} className="size-1.5 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: `${d}ms` }} />
-                  ))}
-                </span>
-                Checking the project data…
-              </div>
-            )}
-            <div ref={endRef} />
+        )}
+        {messages.map((m) => <Message key={m.id} message={m} onRetry={retry} />)}
+        {pending && (
+          <div className="flex items-center gap-3" data-testid="chat-pending">
+            <AssistantAvatar />
+            <span className="flex items-center gap-2 rounded-2xl rounded-tl-md bg-muted/80 px-4 py-3 text-sm text-muted-foreground">
+              <span className="flex gap-1">
+                {[0, 150, 300].map((d) => (
+                  <span key={d} className="size-1.5 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: `${d}ms` }} />
+                ))}
+              </span>
+              Checking the project data…
+            </span>
           </div>
         )}
       </div>
 
-      <form
-        className="border-t p-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-      >
-        <div className="flex items-end gap-2 rounded-xl border bg-background p-1.5 focus-within:ring-2 focus-within:ring-ring/40">
-          <Textarea
+      <form className="px-5 pt-3 pb-5" onSubmit={(e) => { e.preventDefault(); submit(); }}>
+        <div className="flex items-end gap-3">
+          <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -182,17 +213,15 @@ export function ChatPanel({ className, autoFocus }: { className?: string; autoFo
             rows={1}
             autoFocus={autoFocus}
             disabled={!!notConfigured}
-            placeholder={notConfigured ? "Configure an AI key to start chatting" : "Ask about sites, sensors, alerts…"}
+            placeholder={notConfigured ? "Configure an AI key to start chatting" : "Ask a question about your sites, sensors, or alerts…"}
             aria-label="Message SiteWatch AI"
-            className="max-h-32 min-h-9 resize-none border-0 bg-transparent shadow-none focus-visible:ring-0"
+            className="max-h-28 min-h-12 flex-1 resize-none rounded-xl border bg-card px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25 disabled:opacity-60"
           />
-          <Button type="submit" size="icon" disabled={disabled || !draft.trim()} aria-label="Send message">
-            <ArrowUp />
-          </Button>
+          <button type="submit" disabled={disabled || !draft.trim()} aria-label="Send message"
+            className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#3b82f6] text-white shadow-[0_6px_16px_-6px_rgb(59_130_246/0.8)] transition-colors hover:bg-[#2563eb] disabled:opacity-50 disabled:shadow-none">
+            <SendHorizontal className="size-5" />
+          </button>
         </div>
-        <p className="px-1 pt-1.5 text-[11px] text-muted-foreground">
-          Static project data. An exceedance of a configured threshold is not necessarily a regulatory violation.
-        </p>
       </form>
     </div>
   );
