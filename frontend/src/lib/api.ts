@@ -1,5 +1,5 @@
 import type {
-  ChatResponse, ChatStatus, ChatTurn, Exceedance, Health, Overview, Page, Reading, ReadingsQuery, SensorInfo,
+  ChatResponse, ChatStatus, ChatTurn, Exceedance, Health, Overview, OverviewQuery, Page, Reading, ReadingsQuery, SensorInfo,
   SiteDetail, SiteSummary, Summary, Threshold,
 } from "./types";
 
@@ -56,7 +56,8 @@ async function request<T>(path: string, init: RequestInit = {}, signal?: AbortSi
 
 export const api = {
   health: (signal?: AbortSignal) => request<Health>("/health", {}, signal),
-  overview: (signal?: AbortSignal) => request<Overview>("/api/overview", {}, signal),
+  overview: (query: OverviewQuery = {}, signal?: AbortSignal) =>
+    request<Overview>(`/api/overview${qs(query as Query)}`, {}, signal),
   sites: (signal?: AbortSignal) => request<SiteSummary[]>("/api/sites", {}, signal),
   site: (siteId: string, signal?: AbortSignal) =>
     request<SiteDetail>(`/api/sites/${encodeURIComponent(siteId)}`, {}, signal),

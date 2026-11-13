@@ -19,7 +19,7 @@ const DataContext = createContext<DataContextValue | null>(null);
 /** Loads /api/overview and /health once and shares them with the header, sidebar and pages. */
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { data, error, loading, reload } = useApi("overview", async (signal) => {
-    const [overview, health] = await Promise.all([api.overview(signal), api.health(signal)]);
+    const [overview, health] = await Promise.all([api.overview({}, signal), api.health(signal)]);
     return { overview, health, fetchedAt: new Date() };
   });
   return (

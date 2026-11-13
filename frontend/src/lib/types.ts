@@ -53,6 +53,8 @@ export interface Exceedance {
   unit: string;
   exceeded_by: number;
   exceeded_by_pct: number | null;
+  /** Display priority from percent over the limit: high >= 20%, medium >= 5%, low < 5%. */
+  severity: "high" | "medium" | "low";
 }
 
 export interface SiteSensorGroup {
@@ -128,6 +130,7 @@ export interface Overview {
   data_source: { type: "static_files"; files: string[]; loaded_at: string; note: string };
   period_start: string | null;
   period_end: string | null;
+  available_dates: string[];
   totals: Totals;
   sites: SiteSummary[];
   sensor_breakdown: SensorBreakdown[];
@@ -204,4 +207,12 @@ export interface ReadingsQuery {
   order?: "asc" | "desc";
   page?: number;
   page_size?: number;
+}
+
+export interface OverviewQuery {
+  site_id?: string;
+  sensor?: string;
+  status?: ReadingStatus;
+  start?: string;
+  end?: string;
 }
