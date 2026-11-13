@@ -5,6 +5,7 @@ import { AlertsCard } from "@/components/dashboard/alerts-card";
 import { EMPTY_FILTERS, FilterBar, type DashboardFilters } from "@/components/dashboard/filter-bar";
 import { KpiRow } from "@/components/dashboard/kpi-row";
 import { SitesCard } from "@/components/dashboard/sites-card";
+import { TrendsCard } from "@/components/dashboard/trends-card";
 import { useData } from "@/components/data-provider";
 import { ErrorState } from "@/components/states";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,6 +59,9 @@ export function DashboardView() {
           <div className="grid gap-5 xl:grid-cols-2">
             <SitesCard sites={overview.sites} total={all?.totals.total_sites ?? overview.totals.total_sites} />
             <AlertsCard alerts={overview.recent_alerts} total={overview.totals.exceeded_readings} multiDay={multiDay} />
+          </div>
+          <div className="grid gap-5 xl:grid-cols-2">
+            <TrendsCard trends={overview.trends} />
           </div>
         </div>
       )}
