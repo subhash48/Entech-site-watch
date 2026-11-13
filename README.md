@@ -10,13 +10,38 @@ The data comes from static files. It is not a live or real-time feed.
 
 ## Features
 
-- **Overview:** total sites, affected sites, exceedances, normal and missing readings, sensor trend charts with the limit line, a sensor status breakdown, recent alerts and a site monitoring table.
-- **Sites:** status, alert counts, and each site's readings grouped by sensor, with timestamps, units, configured limits and exceedance amounts.
-- **Sensor readings:** searchable and paginated, with filters for site, sensor, status and time range, and sortable timestamp and value columns. Missing values are shown as "Missing" and never as zero.
+- **Dashboard** (built from [design/sitewatch-reference.png](design/sitewatch-reference.png)):
+  - KPI cards: Total Sites, Active Alerts, Data Coverage and Missing Data.
+  - A filter row for site, sensor type, status and date. Every count and card follows it.
+  - A Sites table and a Sensor Alerts list.
+  - An Alert Trends chart with Alerts and Readings views.
+  - The embedded Project AI Assistant.
+- **Sites:** status, alert counts and data coverage per site. Each site's page groups its readings by sensor, with timestamps, units, configured limits and exceedance amounts.
 - **Alerts:** confirmed exceedances only, with measured value, limit, excess and percentage over. Missing data is kept separate.
-- **Reports:** a deterministic plain-English client report, for all sites or one site, with Copy and Download (.txt) buttons.
-- **AI Assistant:** a floating panel and a dedicated page. Answers cite their sources (data files or documentation sections), and the assistant refuses unrelated questions.
-- **Settings:** theme, API connection, data source, AI status and the configured thresholds.
+- **Sensors:** all readings, searchable and paginated, filterable by site, sensor, status and time range, with sortable timestamp and value columns. Missing values show as "Missing", never zero. The old `/readings` URL redirects here.
+- **Reports:** a deterministic plain-English client report for all sites or one site, with Copy and Download (.txt) buttons.
+- **AI Assistant:**
+  - A floating panel, a dedicated page and the dashboard card.
+  - Answers cite their sources (data files or documentation sections).
+  - Unrelated questions are refused.
+- **Settings:** theme, API connection, data source, AI status and configured thresholds.
+- **Header:** per-page title, Ctrl/⌘+K search across readings, a notifications menu listing the real exceedances, and a workspace menu (theme, reload, settings, API docs). There is no sign-in, and the menu says so.
+- **Layout:** responsive, with an expanded sidebar on desktop, an icon rail on tablet and an off-canvas menu on phones. Light theme by default; dark mode is in the workspace menu.
+
+### Where the dashboard differs from the reference image, and why
+
+The reference image contains some sample figures the supplied data cannot support. They were replaced with measured values instead of being invented:
+
+| Reference shows | SiteWatch shows | Reason |
+|---|---|---|
+| "Sensors Online 28 / 30" | **Data Coverage**: readings with a value / readings received (14 / 15, 93%) | The CSV has no sensor connectivity data. |
+| "+67% vs. last 7 days" style badges | Counts in the current view (e.g. "3 sites", "1 site") | The data covers one day, so there is no week-over-week change. |
+| Seven daily points on Alert Trends | Hourly buckets (daily when the data spans more than two days) | No seven-day history exists in the data. |
+| Borough names, site photos, sensor IDs such as "Vib-03" | Site ID, sensor types, and sensor names from the CSV | Not in the data. |
+| A user photo | A workspace menu that states no sign-in is configured | There is no authentication in this demo. |
+| "Real-time" wording | "Static dataset loaded" | The data is loaded from files, not a live feed. |
+
+**Alert severity** (High / Medium / Low) is a display priority based on how far a reading was above its limit: High at 20% or more, Medium from 5% to under 20%, Low under 5%. It is not a regulatory classification. See [docs/methodology.md](docs/methodology.md).
 
 ## Repository layout
 
@@ -30,6 +55,7 @@ frontend/           Next.js dashboard
   src/components/   layout, widgets, tables, charts, chat
   e2e/              Playwright end-to-end tests
 docs/               methodology.md, architecture.md (also indexed by the assistant)
+design/             sitewatch-reference.png (dashboard design reference)
 ```
 
 ## Local setup on Windows
@@ -108,7 +134,18 @@ npm run test:e2e
 
 The pytest suite covers threshold comparisons (including values exactly at the limit), missing-data handling, validation of every field, filtering, sorting, pagination, response schemas, CORS, error codes, and the assistant's scope guard, tool allowlist, argument validation, iteration limits and prompt-injection handling. A scripted fake model is used, so no real API calls are made.
 
-The Playwright suite checks that the dashboard numbers match the CSV-derived values (3 sites, 3 affected, 5 exceedances, 9 normal, 1 missing). It also exercises filters, pagination, sorting, search, the time range filter, site details, alerts, report copy and download, dark mode, the offline error state, the AI setup message and the mobile layout.
+The Playwright suite (17 tests) checks that the dashboard numbers match the CSV-derived values: 3 sites, 5 exceedances, 14 of 15 readings with data, and 1 missing. It also covers:
+
+- every dashboard filter
+- the hourly trend chart
+- site drill-down and notifications
+- Ctrl+K search and the `/readings` redirect
+- every sidebar page
+- alerts, and report copy and download
+- dark mode
+- the offline error state
+- the AI setup message and a mocked grounded chat answer
+- zero horizontal overflow on every page at phone width, and the tablet icon rail
 
 ## Monitoring methodology
 
@@ -124,11 +161,11 @@ See [docs/methodology.md](docs/methodology.md) for details.
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/health` | Liveness, loaded data counts, AI configured flag |
-| GET | `/api/overview` | Totals, site statuses, sensor breakdown, trends, recent alerts, validation warnings |
+| GET | `/api/overview` | Totals, site statuses, sensor breakdown, trends, recent alerts, validation warnings. Accepts the same filters as `/api/readings`: `site_id`, `sensor`, `status`, `start`, `end` |
 | GET | `/api/sites` | Site summaries with status and alert counts |
 | GET | `/api/sites/{site_id}` | One site with readings grouped by sensor |
 | GET | `/api/readings` | Filters: `site_id`, `sensor` (id or type), `status`, `start`, `end`, `q`. Sorting: `sort` (`timestamp`, `value`, `site`, `sensor`) and `order`. Pagination: `page`, `page_size` (max 100) |
-| GET | `/api/exceedances` | Confirmed exceedances, filters `site_id`, `sensor`, `start`, `end`, `order` |
+| GET | `/api/exceedances` | Confirmed exceedances with `severity`. Filters: `site_id`, `sensor`, `start`, `end`, `order` |
 | GET | `/api/summary` | Deterministic client report, optional `site_id` |
 | GET | `/api/sensors`, `/api/thresholds` | Sensors present and configured rules |
 | GET | `/api/chat/status` | Whether the assistant is configured |

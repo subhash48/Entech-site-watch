@@ -24,15 +24,17 @@ There is no database in this version. The dataset is small and held in memory, c
 
 ## Frontend layout
 
-- `src/app/`: one route per sidebar section: Overview, Sites, Sensor Readings, Alerts, Reports, AI Assistant and Settings.
-- `src/components/`: the layout shell (collapsible sidebar and header), dashboard widgets, tables, charts and chat panel.
+- `src/app/`: one route per sidebar section: Dashboard (`/`), Sites, Alerts, Sensors (`/sensors`), Reports, AI Assistant and Settings.
+- `src/components/shell/`: the navy sidebar, the page header (search, notifications, workspace menu) and the responsive app shell.
+- `src/components/dashboard/`: KPI cards, filter row, Sites card, Sensor Alerts card and Alert Trends chart. The dashboard layout follows `design/sitewatch-reference.png`.
+- `src/components/chat/`: the Project AI Assistant panel, used on the dashboard, the AI Assistant page and the floating launcher.
 - `src/components/ui/`: shadcn/ui primitives.
 - `src/lib/api.ts`: typed API client. The backend URL comes from `NEXT_PUBLIC_API_BASE_URL`.
 
 ## API endpoints
 
 - `GET /health`: liveness, counts of loaded data and whether the AI assistant is configured.
-- `GET /api/overview`: totals, site statuses, sensor status breakdown, trend series, recent alerts and validation warnings.
+- `GET /api/overview`: totals, site statuses, sensor status breakdown, trend series, recent alerts and validation warnings. It accepts `site_id`, `sensor`, `status`, `start` and `end`, so the dashboard filter row narrows every count.
 - `GET /api/sites` and `GET /api/sites/{site_id}`: site summaries, and one site's readings grouped by sensor.
 - `GET /api/readings`: readings filtered by `site_id`, `sensor` (id or type), `status`, `start`, `end` and free-text `q`, sorted by `timestamp`, `value`, `site` or `sensor`, and paginated with `page` and `page_size` (max 100).
 - `GET /api/exceedances`: confirmed threshold exceedances only.
