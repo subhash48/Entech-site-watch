@@ -194,3 +194,37 @@ def test_data_reloads_when_file_changes(make_client, tmp_path):
     (tmp_path / "readings.csv").write_text(
         "site_id,site_name,sensor,timestamp,value\nS1,Alpha,noise_dba,2026-11-02T10:00:00,99.5\n", encoding="utf-8")
     assert [e["value"] for e in c.get("/api/exceedances").json()] == [99.5]
+
+
+# ---------- deployment (Vercel) ----------
+
+def test_docs_fall_back_to_bundled_copy_when_repo_root_absent(monkeypatch, tmp_path):
+    """On Vercel only backend/ is bundled; the assistant then reads backend/project_docs/."""
+    from app import config
+    monkeypatch.setattr(config, "REPO_DIR", tmp_path / "missing-repo")
+    assert config.default_docs_paths() == [config.BASE_DIR / "project_docs"]
+
+
+def test_bundle_docs_script_copies_readme_and_docs(tmp_path):
+    import shutil
+    import subprocess
+    import sys
+    from pathlib import Path
+    repo = tmp_path / "repo"
+    (repo / "docs").mkdir(parents=True)
+    (repo / "README.md").write_text("# Readme\n", encoding="utf-8")
+    (repo / "docs" / "methodology.md").write_text("# Method\n", encoding="utf-8")
+    script = Path(__file__).resolve().parents[1] / "scripts" / "bundle_docs.py"
+    (repo / "backend" / "scripts").mkdir(parents=True)
+    shutil.copy(script, repo / "backend" / "scripts" / "bundle_docs.py")
+    subprocess.run([sys.executable, str(repo / "backend" / "scripts" / "bundle_docs.py")], check=True,
+                   capture_output=True)
+    assert sorted(p.name for p in (repo / "backend" / "project_docs").iterdir()) == ["README.md", "methodology.md"]
+
+
+def test_environment_falls_back_to_vercel_env(monkeypatch):
+    from app import config
+    monkeypatch.setattr(config, "load_env_file", lambda *a, **k: None)
+    monkeypatch.delenv("ENVIRONMENT", raising=False)
+    monkeypatch.setenv("VERCEL_ENV", "production")
+    assert config.Settings.from_env().environment == "production"

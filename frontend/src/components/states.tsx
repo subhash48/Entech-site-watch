@@ -1,7 +1,7 @@
 import { CircleOff, RefreshCw, ServerCrash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ApiError } from "@/lib/api";
+import { IS_LOCAL_API, type ApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function ErrorState({ error, onRetry, className }: { error: ApiError; onRetry?: () => void; className?: string }) {
@@ -11,7 +11,14 @@ export function ErrorState({ error, onRetry, className }: { error: ApiError; onR
       <div className="space-y-1">
         <p className="text-sm font-semibold">Could not load data</p>
         <p className="max-w-md text-sm text-muted-foreground">{error.message}</p>
-        {error.code !== "NETWORK_ERROR" && <p className="font-mono text-xs text-muted-foreground">{error.code}</p>}
+        {error.code === "NETWORK_ERROR" ? IS_LOCAL_API && (
+          <p className="text-xs text-muted-foreground">
+            Start it with <code className="rounded bg-muted px-1 py-0.5 font-mono">cd backend</code> then{" "}
+            <code className="rounded bg-muted px-1 py-0.5 font-mono">python -m uvicorn app.main:app --reload --port 8001</code>
+          </p>
+        ) : (
+          <p className="font-mono text-xs text-muted-foreground">{error.code}</p>
+        )}
       </div>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>

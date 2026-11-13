@@ -5,7 +5,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent      # backend/
 REPO_DIR = BASE_DIR.parent                              # repository root
-DEFAULT_ORIGINS = "http://localhost:3000,http://127.0.0.1:3000"
+DEFAULT_ORIGINS = "http://localhost:3100,http://127.0.0.1:3100"  # frontend dev server (npm run dev)
 
 
 def load_env_file(path: Path = BASE_DIR / ".env") -> None:
@@ -22,6 +22,14 @@ def load_env_file(path: Path = BASE_DIR / ".env") -> None:
             value = value[1:-1]
         if key.strip() and value:
             os.environ.setdefault(key.strip(), value)
+
+
+def default_docs_paths() -> list[Path]:
+    """README.md + docs/ at the repo root locally; on Vercel, the copy made by scripts/bundle_docs.py
+    (the Python function bundle contains only backend/)."""
+    if (REPO_DIR / "README.md").is_file():
+        return [REPO_DIR / "README.md", REPO_DIR / "docs"]
+    return [BASE_DIR / "project_docs"]
 
 
 def _split(value: str) -> list[str]:
@@ -68,8 +76,9 @@ class Settings:
             # Exact origins allowed to call the API from a browser, e.g. your deployed frontend URL.
             cors_origins=_split(os.getenv("CORS_ORIGINS", DEFAULT_ORIGINS)),
             cors_origin_regex=os.getenv("CORS_ORIGIN_REGEX") or None,
-            environment=os.getenv("ENVIRONMENT", "development"),
-            docs_paths=[Path(p) for p in _split(docs)] if docs else [REPO_DIR / "README.md", REPO_DIR / "docs"],
+            # VERCEL_ENV (production | preview | development) is set automatically on Vercel.
+            environment=os.getenv("ENVIRONMENT") or os.getenv("VERCEL_ENV") or "development",
+            docs_paths=[Path(p) for p in _split(docs)] if docs else default_docs_paths(),
             ai_provider=os.getenv("AI_PROVIDER", "anthropic").strip().lower(),
             ai_model=os.getenv("AI_MODEL", "claude-opus-5-5").strip(),
             ai_effort=effort if effort in {"low", "medium", "high", "xhigh", "max"} else "medium",

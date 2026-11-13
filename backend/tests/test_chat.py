@@ -65,7 +65,21 @@ def test_not_configured_returns_setup_message():
     assert c.get("/health").json()["ai_configured"] is False
 
 
+def test_unsupported_provider_is_explained():
+    settings = settings_for(DATA_DIR / "readings.csv", DATA_DIR / "thresholds.json")
+    settings = settings.__class__(**{**settings.__dict__, "ai_provider": "groq", "anthropic_api_key": None})
+    c = TestClient(create_app(settings))
+    status = c.get("/api/chat/status").json()
+    assert status["configured"] is False
+    assert "AI_PROVIDER 'groq' is not supported" in status["message"]
+    res = ask(c, "Which sites exceeded their limits?")
+    assert res.status_code == 503 and "not supported" in res.json()["error"]["message"]
+
+
 def test_api_key_never_exposed(monkeypatch):
+    # Isolate from any developer backend/.env so the test sees only the variables set here.
+    monkeypatch.setattr("app.config.load_env_file", lambda *a, **k: None)
+    monkeypatch.setenv("AI_PROVIDER", "anthropic")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-secret-value")
     from app.config import Settings
     s = Settings.from_env()

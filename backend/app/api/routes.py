@@ -43,6 +43,16 @@ OrderQ = Annotated[queries.SortOrder, Query(description="asc or desc")]
 
 NOT_CONFIGURED = ("SiteWatch AI is not configured. Set ANTHROPIC_API_KEY in the backend environment "
                   "(see backend/.env.example) and restart the API.")
+SUPPORTED_PROVIDERS = ("anthropic",)
+
+
+def not_configured_message(settings: Settings) -> str:
+    """Explain exactly why the assistant is unavailable, without revealing any secret values."""
+    if settings.ai_provider not in SUPPORTED_PROVIDERS:
+        return (f"AI_PROVIDER '{settings.ai_provider}' is not supported in this version (supported: "
+                f"{', '.join(SUPPORTED_PROVIDERS)}). Set AI_PROVIDER=anthropic and ANTHROPIC_API_KEY in "
+                "backend/.env, then restart the API.")
+    return NOT_CONFIGURED
 
 
 @router.get("/health", response_model=Health, tags=["system"])
@@ -122,7 +132,7 @@ def summary(ds: DatasetDep, site_id: SiteQ = None):
 def chat_status(settings: SettingsDep, llm: Annotated[LLMProvider | None, Depends(get_llm)]):
     return ChatStatus(configured=llm is not None, provider=settings.ai_provider,
                       model=llm.model if llm else None,
-                      message="SiteWatch AI is ready." if llm else NOT_CONFIGURED)
+                      message="SiteWatch AI is ready." if llm else not_configured_message(settings))
 
 
 @router.post("/api/chat", response_model=ChatResponse, tags=["assistant"])
@@ -130,5 +140,5 @@ def chat(body: ChatRequest, ds: DatasetDep, settings: SettingsDep,
          llm: Annotated[LLMProvider | None, Depends(get_llm)]):
     """Ask SiteWatch AI a question about this project. Answers are grounded in read-only tools."""
     if llm is None:
-        raise APIError(503, "AI_NOT_CONFIGURED", NOT_CONFIGURED)
+        raise APIError(503, "AI_NOT_CONFIGURED", not_configured_message(settings))
     return answer(body, llm, ds, load_index(settings.docs_paths), settings.ai_max_iterations)

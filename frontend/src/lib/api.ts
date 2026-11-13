@@ -3,8 +3,21 @@ import type {
   SiteDetail, SiteSummary, Summary, Threshold,
 } from "./types";
 
-/** Backend base URL. Public by design: it is embedded in the browser bundle. Never put secrets here. */
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001").replace(/\/+$/, "");
+/**
+ * Backend base URL. Public by design: it is embedded in the browser bundle. Never put secrets here.
+ * - Local dev: NEXT_PUBLIC_API_BASE_URL from .env.local, else http://localhost:8001.
+ * - Production (Vercel Services): leave it unset; "" means same-origin requests such as /api/sites,
+ *   which vercel.json routes to the FastAPI service.
+ */
+export const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? (process.env.NODE_ENV === "development" ? "http://localhost:8001" : "")
+).replace(/\/+$/, "");
+
+/** True when the API runs on this machine, so setup hints about starting uvicorn make sense. */
+export const IS_LOCAL_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(API_BASE_URL);
+
+/** Human-readable API location for status text. */
+export const API_LABEL = API_BASE_URL || "this site (same origin)";
 
 export class ApiError extends Error {
   constructor(
@@ -44,7 +57,9 @@ async function request<T>(path: string, init: RequestInit = {}, signal?: AbortSi
   } catch (err) {
     if (signal?.aborted) throw err;
     throw new ApiError(0, "NETWORK_ERROR",
-      `Cannot reach the SiteWatch API at ${API_BASE_URL}. Make sure the backend is running.`);
+      IS_LOCAL_API
+        ? `Cannot reach the SiteWatch API at ${API_BASE_URL}. Make sure the backend is running.`
+        : `Cannot reach the SiteWatch API at ${API_LABEL}. Please try again in a moment.`);
   }
   const body = await res.json().catch(() => null);
   if (!res.ok) {

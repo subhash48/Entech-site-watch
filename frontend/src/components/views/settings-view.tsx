@@ -8,7 +8,7 @@ import { useData } from "@/components/data-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { API_BASE_URL } from "@/lib/api";
+import { API_LABEL } from "@/lib/api";
 import { formatLoadedAt, formatNumber } from "@/lib/format";
 
 const subscribe = () => () => {};
@@ -47,7 +47,7 @@ export function SettingsView() {
           <CardHeader><CardTitle>API connection</CardTitle><CardDescription>Set with NEXT_PUBLIC_API_BASE_URL.</CardDescription></CardHeader>
           <CardContent>
             <dl>
-              <Row label="Backend URL"><span className="font-mono text-xs">{API_BASE_URL}</span></Row>
+              <Row label="Backend URL"><span className="font-mono text-xs">{API_LABEL}</span></Row>
               <Row label="Status">{error ? <span className="text-exceeded">Offline</span> : health ? <span className="text-normal">Connected</span> : "Checking…"}</Row>
               <Row label="API version">{health?.version ?? "—"}</Row>
               <Row label="Environment">{health?.environment ?? "—"}</Row>

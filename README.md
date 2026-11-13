@@ -50,13 +50,36 @@ backend/            FastAPI service
   app/              config, schemas, errors, services/, ai/, api/routes.py
   data/             readings.csv, thresholds.json (the source data)
   tests/            pytest suite
+  scripts/          bundle_docs.py (Vercel build step)
 frontend/           Next.js dashboard
   src/app/          one route per sidebar section
   src/components/   layout, widgets, tables, charts, chat
   e2e/              Playwright end-to-end tests
 docs/               methodology.md, architecture.md (also indexed by the assistant)
 design/             sitewatch-reference.png (dashboard design reference)
+vercel.json         Vercel Services: Next.js + FastAPI under one URL
 ```
+
+## Deploy to Vercel (one URL)
+
+The root [vercel.json](vercel.json) uses [Vercel Services](https://vercel.com/docs/services) to deploy both apps in one project:
+
+| Path | Service |
+| --- | --- |
+| `/api/*`, `/health`, `/docs`, `/redoc`, `/openapi.json` | `api`: FastAPI (`backend/`, entrypoint `app.main:app`) |
+| everything else | `web`: Next.js (`frontend/`) |
+
+Vercel passes the original path to the service, so the backend's routes are unchanged. The frontend calls `/api/...` on its own origin, so no CORS setup is needed.
+
+1. Import the GitHub repository in Vercel. Leave the Root Directory as the repository root; Vercel detects both services from `vercel.json`.
+2. In **Project Settings > Environment Variables**, add `ANTHROPIC_API_KEY` (server-side only). The optional `AI_*` settings are listed in [.env.example](.env.example). Do **not** set `NEXT_PUBLIC_API_BASE_URL`: leaving it unset makes the browser call the API on the same origin.
+3. Deploy, then check `https://<your-app>.vercel.app/health` and `/docs`.
+
+How the details are handled:
+- `backend/data/readings.csv` and `thresholds.json` are committed and found through paths relative to the code, so they are bundled with the Python function.
+- The function bundle contains only `backend/`, so the backend build step (`scripts/bundle_docs.py`) copies `README.md` and `docs/*.md` into `backend/project_docs/` for the assistant's doc search.
+- The Python version is pinned in `backend/.python-version` (3.12) and dependencies come from `backend/requirements.txt`. The function's `maxDuration` is 300 s, which covers the assistant's 90 s deadline plus one slow model call with a retry.
+- `ENVIRONMENT` falls back to Vercel's `VERCEL_ENV` (production / preview).
 
 ## Local setup on Windows
 
@@ -101,7 +124,7 @@ npm run dev
 
 ### 5. Open the dashboard
 
-Go to http://localhost:3000.
+Go to http://localhost:3100.
 
 ### 6. Enable and test the AI chat (optional)
 
@@ -110,7 +133,7 @@ The dashboard works fully without an AI key. To enable SiteWatch AI:
 1. Create an API key in the Anthropic Console (https://platform.claude.com/, API keys).
 2. Copy `backend\.env.example` to `backend\.env`.
 3. Set `ANTHROPIC_API_KEY=` to your key in `backend\.env`. Do not paste it anywhere else; `.env` is git-ignored.
-4. Restart the backend, then open http://localhost:3000/assistant and try a suggested prompt such as "Which sites exceeded their limits?".
+4. Restart the backend, then open http://localhost:3100/assistant and try a suggested prompt such as "Which sites exceeded their limits?".
 
 Without a key, the assistant shows these setup steps and `POST /api/chat` returns HTTP 503 with code `AI_NOT_CONFIGURED`. It never returns a made-up answer.
 
@@ -189,7 +212,8 @@ Every error has the same shape: `{"error": {"code": "SITE_NOT_FOUND", "message":
 
 ## Troubleshooting
 
-- **"Cannot reach the SiteWatch API":** start the backend and check that `NEXT_PUBLIC_API_BASE_URL` matches its port. Restart `npm run dev` after changing `.env.local`.
+- **"Could not load data. Cannot reach the SiteWatch API at http://localhost:8001":** the backend is not running. Start it from the `backend` folder with `python -m uvicorn app.main:app --reload --port 8001`, then click Try again. If you run the backend on another port, set `NEXT_PUBLIC_API_BASE_URL` in `frontend/.env.local` to match and restart `npm run dev`.
+- **Ports:** the frontend dev server uses port 3100 and the backend uses 8001. The backend's default `CORS_ORIGINS` allows `http://localhost:3100` and `http://127.0.0.1:3100`. If you change the frontend port, add the new origin to `CORS_ORIGINS` in `backend/.env`.
 - **`[Errno 10048] only one usage of each socket address`:** the port is in use. Stop the other process or choose another port.
 - **CORS errors:** add your frontend origin to `CORS_ORIGINS` in `backend/.env`.
 - **Data changes:** edit `backend/data/readings.csv` or `thresholds.json`. The API reloads them automatically on the next request.

@@ -27,3 +27,6 @@ test-results/
 Thumbs.db
 .vscode/
 .idea/
+
+# Vercel build output: docs copied into the backend bundle by backend/scripts/bundle_docs.py
+backend/project_docs/

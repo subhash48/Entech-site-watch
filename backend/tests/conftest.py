@@ -8,7 +8,7 @@ from app.config import REPO_DIR, Settings
 from app.main import create_app
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-ORIGIN = "http://localhost:3000"
+ORIGIN = "http://localhost:3100"
 HEADER = "site_id,site_name,sensor,timestamp,value\n"
 THRESHOLDS = {"vibration_ppv": {"limit": 0.5, "unit": "in/s"},
               "noise_dba": {"limit": 85, "unit": "dBA"},
