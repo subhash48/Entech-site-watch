@@ -5,7 +5,6 @@ import { Download } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import { useData } from "@/components/data-provider";
 import { FilterSelect } from "@/components/filter-select";
-import { PageHeader } from "@/components/page-header";
 import { SiteStatusBadge } from "@/components/status";
 import { ErrorState } from "@/components/states";
 import { Button } from "@/components/ui/button";
@@ -35,12 +34,10 @@ export function ReportsView() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Reports"
-        description="A deterministic, client-ready summary generated from the classified readings. Same data, same report."
-        actions={
+      <div className="flex justify-end">
           <FilterSelect label="Scope" value={siteId} onChange={setSiteId} allLabel="All sites" testId="report-scope"
             options={(overview?.sites ?? []).map((s) => ({ value: s.site_id, label: `${s.site_name} (${s.site_id})` }))} />
-        } />
+      </div>
 
       {error ? (
         <ErrorState error={error} onRetry={reload} />

@@ -3,7 +3,6 @@
 import { Database, FileText, ShieldCheck, Wrench } from "lucide-react";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { useChat } from "@/components/chat/chat-provider";
-import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TOOLS = ["get_sites", "get_site_details", "get_readings", "get_exceedances", "get_thresholds",
@@ -13,10 +12,8 @@ export function AssistantView() {
   const { status } = useChat();
   return (
     <div className="space-y-4">
-      <PageHeader title="AI Assistant"
-        description="SiteWatch AI answers questions about this project only, using read-only tools over the same validated data as the dashboard." />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="h-[calc(100svh-12rem)] min-h-[480px] gap-0 overflow-hidden py-0 lg:col-span-2">
+        <Card className="h-[calc(100svh-11rem)] min-h-[520px] gap-0 overflow-hidden rounded-2xl py-0 shadow-card lg:col-span-2">
           <ChatPanel className="h-full" />
         </Card>
         <div className="space-y-4">

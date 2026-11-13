@@ -5,7 +5,6 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useChat } from "@/components/chat/chat-provider";
 import { useData } from "@/components/data-provider";
-import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -31,7 +30,6 @@ export function SettingsView() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Settings" description="Appearance, connection and data configuration. Thresholds are read from thresholds.json." />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="gap-3">
           <CardHeader><CardTitle>Appearance</CardTitle><CardDescription>Theme for this browser.</CardDescription></CardHeader>

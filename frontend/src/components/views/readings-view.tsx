@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, RotateCcw, Search } from "lucide-react";
 import { useData } from "@/components/data-provider";
 import { FilterSelect } from "@/components/filter-select";
-import { PageHeader } from "@/components/page-header";
 import { ReadingStatusBadge, rowTone, STATUS_LABEL } from "@/components/status";
 import { EmptyState, ErrorState, TableSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
@@ -94,9 +93,6 @@ function ReadingsExplorer({ initial }: { initial: Filters }) {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Sensor readings"
-        description="Every reading from readings.csv with the threshold applied to it. Missing values are shown explicitly and never treated as zero." />
-
       <Card className="gap-0 py-0">
         <div className="grid items-end gap-3 border-b p-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-[1.4fr_repeat(5,1fr)_auto]">
           <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">

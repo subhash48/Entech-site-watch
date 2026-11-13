@@ -19,7 +19,7 @@ export function SitesCard({ sites, total }: { sites: SiteSummary[]; total: numbe
       {sites.length === 0 ? (
         <EmptyState title="No sites match these filters" />
       ) : (
-        <div className="-mx-1 overflow-x-auto">
+        <div className="relative -mx-1 overflow-x-auto">
           <table className="w-full min-w-[34rem] text-sm" data-testid="sites-table">
             <thead>
               <tr className="border-b text-left text-[0.8rem] font-semibold">

@@ -33,23 +33,24 @@ export function AlertsCard({ alerts, total, multiDay }: { alerts: Exceedance[]; 
             return (
               <li key={a.reading_id}>
                 <Link href={`/sites/${a.site_id}`} data-severity={a.severity}
-                  className={cn("grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-xl px-3.5 py-3 transition-[filter] hover:brightness-[0.98] sm:grid-cols-[auto_minmax(0,1.3fr)_minmax(0,1fr)_auto_auto]", sev.row)}>
-                  <Icon className={cn("size-6", sev.icon)} strokeWidth={1.8} />
-                  <span className="min-w-0">
-                    <span className="block truncate font-semibold">{meta.name} Limit Exceeded</span>
-                    <span className="block truncate text-xs text-muted-foreground">{a.site_name} • {a.sensor}</span>
+                  className={cn("flex items-center gap-3 rounded-xl px-3.5 py-3 transition-[filter] hover:brightness-[0.98]", sev.row)}>
+                  <Icon className={cn("size-6 shrink-0", sev.icon)} strokeWidth={1.8} />
+                  <span className="min-w-0 flex-1 sm:grid sm:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
+                    <span className="block min-w-0">
+                      <span className="block truncate font-semibold">{meta.name} Limit Exceeded</span>
+                      <span className="block truncate text-xs text-muted-foreground">{a.site_name} • {a.sensor}</span>
+                    </span>
+                    <span className="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-2 sm:mt-0 sm:block">
+                      <span className={cn("block text-base font-bold tabular", sev.value)}>{formatNumber(a.value)} {a.unit}</span>
+                      <span className="block text-xs text-muted-foreground tabular">(limit: {formatNumber(a.threshold)} {a.unit})</span>
+                      <span className="text-xs text-muted-foreground tabular sm:hidden">· {formatTime(a.timestamp)}</span>
+                    </span>
+                    <span className="hidden text-right text-sm whitespace-nowrap text-muted-foreground tabular sm:block">
+                      {formatTime(a.timestamp)}
+                      {multiDay && <span className="block text-xs">{formatDate(a.timestamp)}</span>}
+                    </span>
                   </span>
-                  <span className="col-start-2 min-w-0 sm:col-start-auto">
-                    <span className={cn("block text-base font-bold tabular", sev.value)}>{formatNumber(a.value)} {a.unit}</span>
-                    <span className="block text-xs text-muted-foreground tabular">(limit: {formatNumber(a.threshold)} {a.unit})</span>
-                  </span>
-                  <span className="hidden text-right text-sm whitespace-nowrap text-muted-foreground tabular sm:block">
-                    {formatTime(a.timestamp)}
-                    {multiDay && <span className="block text-xs">{formatDate(a.timestamp)}</span>}
-                  </span>
-                  <span className={cn("row-start-1 rounded-md px-2.5 py-1 text-xs font-semibold sm:row-start-auto", sev.pill)}>
-                    {sev.label}
-                  </span>
+                  <span className={cn("shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold", sev.pill)}>{sev.label}</span>
                 </Link>
               </li>
             );

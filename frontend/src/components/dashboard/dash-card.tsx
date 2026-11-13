@@ -8,11 +8,11 @@ export function DashCard({ icon: Icon, title, subtitle, action, children, classN
 }) {
   return (
     <section data-testid={testId} className={cn("flex min-w-0 flex-col rounded-2xl border bg-card shadow-card", className)}>
-      <header className="flex items-start gap-3 px-5 pt-5 pb-3">
+      <header className="flex flex-wrap items-start gap-3 px-5 pt-5 pb-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
           <Icon className="size-5" strokeWidth={1.9} />
         </span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[11rem] flex-1">
           <h2 className="text-lg leading-tight font-bold tracking-tight">{title}</h2>
           {subtitle && <p className="truncate text-sm text-muted-foreground">{subtitle}</p>}
         </div>

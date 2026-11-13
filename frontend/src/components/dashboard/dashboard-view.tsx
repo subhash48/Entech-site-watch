@@ -41,7 +41,7 @@ export function DashboardView() {
   return (
     <div className="space-y-5">
       {!overview && !error ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
           {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[98px] rounded-2xl" />)}
         </div>
       ) : overview ? <KpiRow overview={overview} /> : null}
@@ -51,17 +51,17 @@ export function DashboardView() {
       {error ? (
         <ErrorState error={error} onRetry={filtered ? reload : refresh} />
       ) : !overview ? (
-        <div className="grid gap-5 xl:grid-cols-2" aria-busy="true">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2" aria-busy="true">
           <Skeleton className="h-[280px] rounded-2xl" />
           <Skeleton className="h-[280px] rounded-2xl" />
         </div>
       ) : (
         <div className={cn("space-y-5 transition-opacity", loading && "opacity-60")} data-testid="dashboard-body">
-          <div className="grid gap-5 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             <SitesCard sites={overview.sites} total={all?.totals.total_sites ?? overview.totals.total_sites} />
             <AlertsCard alerts={overview.recent_alerts} total={overview.totals.exceeded_readings} multiDay={multiDay} />
           </div>
-          <div className="grid gap-5 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             <TrendsCard trends={overview.trends} />
             <section className="flex h-[30rem] min-w-0 flex-col rounded-2xl border bg-card shadow-card xl:h-[25rem]" data-testid="assistant-card">
               <ChatPanel className="h-full" />

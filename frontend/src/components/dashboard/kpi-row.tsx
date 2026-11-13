@@ -52,35 +52,35 @@ export function KpiRow({ overview }: { overview: Overview }) {
 
   const kpis: Kpi[] = [
     { id: "sites", label: "Total Sites", value: t.total_sites, icon: Building2, tone: "blue", href: "/sites",
-      pill: `${t.sites_with_alerts} alerting`, caption: "sites with exceedances" },
+      pill: `${t.sites_with_alerts} alerting`, caption: "in this view" },
     { id: "alerts", label: "Active Alerts", value: t.exceeded_readings, icon: TriangleAlert,
       tone: t.exceeded_readings ? "red" : "green", href: "/alerts",
-      pill: plural(t.sites_with_alerts, "site"), caption: "readings above limit" },
-    { id: "coverage", label: "Readings with Data", icon: Activity, tone: "green", href: "/sensors",
+      pill: plural(t.sites_with_alerts, "site"), caption: "above limit" },
+    { id: "coverage", label: "Data Coverage", icon: Activity, tone: "green", href: "/sensors",
       value: <>{withData}<span className="text-[0.8em] font-semibold text-muted-foreground"> / {t.total_readings}</span></>,
-      pill: `${coverage}%`, pillIcon: Check, caption: "of readings evaluated" },
+      pill: `${coverage}%`, pillIcon: Check, caption: "evaluated" },
     { id: "missing", label: "Missing Data", value: t.missing_data_readings, icon: Database,
       tone: t.missing_data_readings ? "amber" : "green", href: "/sensors?status=MISSING_DATA",
-      pill: plural(missingSites, "site"), caption: "not evaluated, never zero" },
+      pill: plural(missingSites, "site"), caption: "never zero" },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {kpis.map(({ id, label, value, pill, pillIcon: PillIcon, caption, icon: Icon, tone, href }) => (
         <Link key={id} href={href} data-testid={`kpi-${id}`}
-          className={cn("group flex items-center gap-4 rounded-2xl border bg-card p-5 shadow-card transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none", TONE[tone].card)}>
+          className={cn("group flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-card transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none", TONE[tone].card)}>
           <span className={cn("flex size-14 shrink-0 items-center justify-center rounded-2xl", TONE[tone].tile)}>
             <Icon className="size-7" strokeWidth={1.75} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[0.95rem] font-semibold">{label}</span>
-            <span className="block text-3xl leading-tight font-bold tracking-tight tabular" data-testid={`kpi-${id}-value`}>{value}</span>
+            <span className="block text-[0.95rem] leading-snug font-semibold">{label}</span>
+            <span className="block text-[1.85rem] leading-tight font-bold tracking-tight whitespace-nowrap tabular" data-testid={`kpi-${id}-value`}>{value}</span>
           </span>
           <span className="flex shrink-0 flex-col items-end gap-1 self-start pt-1 text-right">
             <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold", TONE[tone].pill)}>
               {PillIcon && <PillIcon className="size-3" strokeWidth={3} />}{pill}
             </span>
-            <span className="max-w-[7.5rem] text-xs leading-snug text-muted-foreground">{caption}</span>
+            <span className="text-xs whitespace-nowrap text-muted-foreground">{caption}</span>
           </span>
         </Link>
       ))}

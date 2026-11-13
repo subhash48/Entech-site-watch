@@ -20,7 +20,7 @@ export function Markdown({ children }: { children: string }) {
           h2: (props) => <p className="font-semibold" {...props} />,
           h3: (props) => <p className="font-semibold" {...props} />,
           table: (props) => (
-            <div className="overflow-x-auto rounded-md border">
+            <div className="relative overflow-x-auto rounded-md border">
               <table className="w-full text-xs" {...props} />
             </div>
           ),

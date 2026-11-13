@@ -87,7 +87,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="relative z-10 px-5 pb-5 group-data-[collapsible=icon]:hidden">
+      <SidebarFooter className="relative z-10 mx-3 mb-4 rounded-xl bg-[#081738]/75 px-3 py-2.5 backdrop-blur-[2px] group-data-[collapsible=icon]:hidden">
         <p className="flex items-center gap-2 text-xs text-sidebar-foreground/80" data-testid="data-source-status"
           data-state={error ? "offline" : overview ? "connected" : "connecting"}>
           <span className={cn("size-2 shrink-0 rounded-full", error ? "bg-[#ff6b6b]" : overview ? "bg-[#4ade80]" : "animate-pulse bg-white/50")} />

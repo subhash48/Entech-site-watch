@@ -28,7 +28,7 @@ const META: [string, Meta][] = [
   ["/alerts", { eyebrow: "Alerts", title: "Threshold Exceedances", subtitle: "Confirmed readings above their sensor's configured limit. Missing data is kept separate." }],
   ["/sensors", { eyebrow: "Sensors", title: "Sensor Readings", subtitle: "Every reading with the threshold applied to it. Missing values are shown explicitly, never as zero." }],
   ["/reports", { eyebrow: "Reports", title: "Client Reports", subtitle: "Deterministic, client-ready summaries generated from the classified readings." }],
-  ["/assistant", { eyebrow: "AI Assistant", title: "Project AI Assistant", subtitle: "Ask questions about this project's sites, sensors, alerts and documentation." }],
+  ["/assistant", { eyebrow: "Workspace", title: "AI Assistant", subtitle: "Ask questions about this project's sites, sensors, alerts and documentation." }],
   ["/settings", { eyebrow: "Settings", title: "Settings", subtitle: "Appearance, API connection, data source and configured thresholds." }],
 ];
 const DASHBOARD: Meta = {

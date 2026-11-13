@@ -30,6 +30,13 @@ interface Series {
   readings: number;
 }
 
+const ORDER = ["vibration", "noise", "dust"];
+/** Vibration, noise, dust first (as in the design), then any other sensor types alphabetically. */
+function ordered(list: Series[]) {
+  const rank = (k: string) => (ORDER.includes(k) ? ORDER.indexOf(k) : ORDER.length);
+  return list.sort((a, b) => rank(a.key) - rank(b.key) || a.key.localeCompare(b.key));
+}
+
 /** Build hourly (or daily, for spans over two days) buckets from the readings actually in view. */
 function useTrendData(trends: SensorTrend[], mode: Mode) {
   return useMemo(() => {
@@ -47,7 +54,7 @@ function useTrendData(trends: SensorTrend[], mode: Mode) {
       }
       series.set(meta.type, s);
     });
-    if (!events.length) return { rows: [], series: [...series.values()], size: HOUR, first: "" };
+    if (!events.length) return { rows: [], series: ordered([...series.values()]), size: HOUR, first: "" };
 
     const min = Math.min(...events.map((e) => e.t));
     const max = Math.max(...events.map((e) => e.t));
@@ -65,7 +72,7 @@ function useTrendData(trends: SensorTrend[], mode: Mode) {
       rows.push(row);
     }
     const iso = new Date(start).toISOString();
-    return { rows, series: [...series.values()], size, first: iso };
+    return { rows, series: ordered([...series.values()]), size, first: iso };
   }, [trends, mode]);
 }
 
@@ -138,7 +145,7 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
               {size === DAY ? "Daily" : "Hourly"} buckets · times as recorded{size === HOUR && first ? ` on ${formatDate(first)}` : ""}
             </p>
           </div>
-          <ul className="grid shrink-0 gap-2.5 sm:w-40 sm:content-center" data-testid="trend-legend">
+          <ul className="grid shrink-0 gap-2.5 sm:w-44 sm:content-center" data-testid="trend-legend">
             {series.map((s) => {
               const value = mode === "alerts" ? s.exceeded : s.readings;
               return (
@@ -148,7 +155,7 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
                   </span>
                   <span className="text-right">
                     <span className="block text-base leading-tight font-bold tabular">{value}</span>
-                    <span className="block text-[11px] text-muted-foreground tabular">
+                    <span className="block text-[11px] whitespace-nowrap text-muted-foreground tabular">
                       {mode === "alerts" ? `of ${s.readings} readings` : `${s.exceeded} exceeded`}
                     </span>
                   </span>

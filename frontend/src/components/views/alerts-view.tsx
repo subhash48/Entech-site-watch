@@ -5,7 +5,6 @@ import { useState } from "react";
 import { CircleDashed } from "lucide-react";
 import { useData } from "@/components/data-provider";
 import { FilterSelect } from "@/components/filter-select";
-import { PageHeader } from "@/components/page-header";
 import { EmptyState, ErrorState, TableSkeleton } from "@/components/states";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -27,9 +26,6 @@ export function AlertsView() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Alerts"
-        description="Confirmed threshold exceedances only: readings strictly above their sensor's configured limit." />
-
       {missing > 0 && (
         <div className="flex items-start gap-3 rounded-lg border border-missing-border bg-missing-soft/50 px-4 py-3 text-sm" data-testid="missing-callout">
           <CircleDashed className="mt-0.5 size-4 shrink-0 text-missing" />

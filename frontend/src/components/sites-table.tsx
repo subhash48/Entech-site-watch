@@ -7,7 +7,7 @@ import type { SiteSummary } from "@/lib/types";
 
 export function SitesTable({ sites }: { sites: SiteSummary[] }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <Table data-testid="sites-table">
         <TableHeader>
           <TableRow>

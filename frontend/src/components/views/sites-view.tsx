@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useData } from "@/components/data-provider";
-import { PageHeader } from "@/components/page-header";
 import { SitesTable } from "@/components/sites-table";
 import { SiteStatusBadge } from "@/components/status";
 import { CardsSkeleton, ErrorState } from "@/components/states";
@@ -51,7 +50,6 @@ export function SitesView() {
   const { overview, error, refresh } = useData();
   return (
     <div className="space-y-6">
-      <PageHeader title="Sites" description="Construction sites in the dataset with their current monitoring status." />
       {error && !overview ? <ErrorState error={error} onRetry={refresh} /> : !overview ? <CardsSkeleton count={3} /> : (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
