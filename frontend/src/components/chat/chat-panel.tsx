@@ -137,6 +137,11 @@ export function ChatPanel({ className, autoFocus, compact = false }: { className
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages.length, pending]);
 
+  // The dashboard preview shows only the latest exchange; the full history is on /assistant.
+  const lastUser = messages.map((m) => m.role).lastIndexOf("user");
+  const visible = compact && lastUser > 0 ? messages.slice(lastUser) : messages;
+  const hidden = messages.length - visible.length;
+
   const submit = (text = draft) => {
     if (!text.trim() || disabled) return;
     send(text);
@@ -179,7 +184,8 @@ export function ChatPanel({ className, autoFocus, compact = false }: { className
         )}
       </div>
 
-      <div ref={logRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-2" data-testid="chat-log" aria-live="polite">
+      <div ref={logRef} className={cn("min-h-0 flex-1 overflow-y-auto", compact ? "space-y-3 px-4 py-1" : "space-y-4 px-5 py-2")}
+        data-testid="chat-log" aria-live="polite">
         {notConfigured && <SetupNotice message={status.message} provider={status.provider} />}
         {statusError && (
           <p role="alert" className="rounded-xl border border-exceeded-border bg-exceeded-soft/60 p-3 text-sm">{statusError}</p>
@@ -199,7 +205,12 @@ export function ChatPanel({ className, autoFocus, compact = false }: { className
             </div>
           </div>
         )}
-        {messages.map((m) => <Message key={m.id} message={m} onRetry={retry} />)}
+        {hidden > 0 && (
+          <Link href="/assistant" className="block text-center text-[11px] text-muted-foreground hover:text-primary" data-testid="earlier-messages">
+            {hidden} earlier message{hidden === 1 ? "" : "s"} · open the full conversation
+          </Link>
+        )}
+        {visible.map((m) => <Message key={m.id} message={m} onRetry={retry} />)}
         {pending && (
           <div className="flex items-center gap-3" data-testid="chat-pending">
             <AssistantAvatar />
