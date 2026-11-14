@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from app import __version__
 from app.ai.provider import build_provider
 from app.api.datasets import router as datasets_router
+from app.api.exports import router as exports_router
 from app.api.routes import router
 from app.config import Settings
 from app.datasets.service import DatasetService
@@ -56,6 +57,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_error_handlers(app)
     app.include_router(router)
     app.include_router(datasets_router)
+    app.include_router(exports_router)
     return app
 
 

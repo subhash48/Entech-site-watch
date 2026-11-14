@@ -4,3 +4,4 @@ anthropic>=2.0,<3.0      # SiteWatch AI (Claude); only used when ANTHROPIC_API_K
 groq>=1.7.0,<2.0         # SiteWatch AI (Groq, e.g. openai/gpt-oss-120b); only used when AI_PROVIDER=groq
 pg8000>=1.31,<2.0         # PostgreSQL dataset storage (pure Python); only used when DATABASE_URL is set
 python-multipart>=0.0.20 # multipart/form-data parsing for dataset uploads
+fpdf2>=2.8,<3.0           # PDF monitoring summary
