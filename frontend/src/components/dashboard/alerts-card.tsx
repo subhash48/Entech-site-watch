@@ -36,6 +36,8 @@ export function AlertsCard({ alerts, total, multiDay }: { alerts: Exceedance[]; 
             return (
               <li key={a.reading_id}>
                 <Link href={`/sites/${a.site_id}`} data-severity={a.severity}
+                  aria-label={`${meta.name} limit exceeded at ${a.site_name}: ${formatNumber(a.value)} ${a.unit}, limit ${formatNumber(a.threshold)} ${a.unit}, ${formatDate(a.timestamp)} ${formatTime(a.timestamp)}, ${sev.label} severity`}
+                  title={`${meta.name} limit exceeded · ${a.site_name} (${a.site_id}) · ${a.sensor}`}
                   className={cn("flex h-[3.625rem] items-center gap-2.5 rounded-xl px-3 transition-[filter] hover:brightness-[0.98]", sev.row)}>
                   <Icon className={cn("size-5 shrink-0", sev.icon)} strokeWidth={1.9} />
                   <span className="min-w-0 flex-1 sm:grid sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-2.5">
