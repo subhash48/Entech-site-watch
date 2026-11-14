@@ -39,10 +39,10 @@ export function DashboardView() {
   const multiDay = (all?.available_dates.length ?? 0) > 1;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {!overview && !error ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
-          {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[98px] rounded-2xl" />)}
+          {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[5.75rem] rounded-2xl" />)}
         </div>
       ) : overview ? <KpiRow overview={overview} /> : null}
 
@@ -51,22 +51,20 @@ export function DashboardView() {
       {error ? (
         <ErrorState error={error} onRetry={filtered ? reload : refresh} />
       ) : !overview ? (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2" aria-busy="true">
-          <Skeleton className="h-[280px] rounded-2xl" />
-          <Skeleton className="h-[280px] rounded-2xl" />
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2" aria-busy="true">
+          {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[17rem] rounded-2xl" />)}
         </div>
       ) : (
-        <div className={cn("space-y-5 transition-opacity", loading && "opacity-60")} data-testid="dashboard-body">
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <SitesCard sites={overview.sites} total={all?.totals.total_sites ?? overview.totals.total_sites} />
-            <AlertsCard alerts={overview.recent_alerts} total={overview.totals.exceeded_readings} multiDay={multiDay} />
-          </div>
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <TrendsCard trends={overview.trends} />
-            <section className="flex h-[30rem] min-w-0 flex-col rounded-2xl border bg-card shadow-card xl:h-[25rem]" data-testid="assistant-card">
-              <ChatPanel className="h-full" />
-            </section>
-          </div>
+        // Two balanced columns: Sites | Sensor Alerts, then Alert Trends | Project AI Assistant.
+        // min-w-0 on every child keeps wide content (tables, charts) from widening the grid.
+        <div className={cn("grid grid-cols-1 gap-4 transition-opacity xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] *:min-w-0", loading && "opacity-60")}
+          data-testid="dashboard-body">
+          <SitesCard sites={overview.sites} total={all?.totals.total_sites ?? overview.totals.total_sites} />
+          <AlertsCard alerts={overview.recent_alerts} total={overview.totals.exceeded_readings} multiDay={multiDay} />
+          <TrendsCard trends={overview.trends} />
+          <section className="flex h-[30rem] min-w-0 flex-col rounded-2xl border bg-card shadow-card xl:h-[25rem]" data-testid="assistant-card">
+            <ChatPanel className="h-full" />
+          </section>
         </div>
       )}
     </div>
