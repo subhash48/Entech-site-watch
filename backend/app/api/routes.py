@@ -9,6 +9,7 @@ from app.ai.agent import answer
 from app.ai.docs_index import load_index
 from app.ai.provider import LLMProvider
 from app.config import Settings
+from app.datasets.catalog import ReadOnlyCatalog
 from app.errors import APIError
 from app.schemas import (ChatRequest, ChatResponse, ChatStatus, ErrorResponse, Exceedance, Health, Overview, Page,
                          Reading, ReadingStatus, SensorInfo, SiteDetail, SiteSummary, Summary, Threshold)
@@ -138,9 +139,10 @@ def chat_status(settings: SettingsDep, llm: Annotated[LLMProvider | None, Depend
 
 
 @router.post("/api/chat", response_model=ChatResponse, tags=["assistant"])
-def chat(body: ChatRequest, ds: DatasetDep, settings: SettingsDep,
+def chat(request: Request, body: ChatRequest, ds: DatasetDep, settings: SettingsDep,
          llm: Annotated[LLMProvider | None, Depends(get_llm)]):
     """Ask SiteWatch AI a question about this project. Answers are grounded in read-only tools."""
     if llm is None:
         raise APIError(503, "AI_NOT_CONFIGURED", not_configured_message(settings))
-    return answer(body, llm, ds, load_index(settings.docs_paths), settings.ai_max_iterations)
+    return answer(body, llm, ds, load_index(settings.docs_paths), settings.ai_max_iterations,
+                  catalog=ReadOnlyCatalog(request.app.state.datasets))

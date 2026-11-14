@@ -22,6 +22,8 @@ chart charts trend trends highest lowest peak max maximum min minimum average me
 status normal value values unit units measurement measurements measured methodology frontend backend fastapi
 nextjs next assistant tool tools rag documentation docs readme validation invalid warning warnings timestamp
 timestamps period nyc york manhattan brooklyn queens filter filters pagination overview
+upload uploads uploaded version versions changed change changes previous latest rollback activated active
+import imported history recorded
 """.split())
 GREETINGS = {"hi", "hello", "hey", "help", "thanks", "thank"}
 WORD_RE = re.compile(r"[a-z0-9]+")
