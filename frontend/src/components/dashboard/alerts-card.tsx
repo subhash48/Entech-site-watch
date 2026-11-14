@@ -8,10 +8,11 @@ import { formatDate, formatNumber, formatTime } from "@/lib/format";
 import type { Exceedance } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+// A light tint plus a severity accent bar, rather than fully coloured rows.
 const SEVERITY = {
-  high: { label: "High", row: "bg-exceeded-soft", pill: "bg-exceeded-border/60 text-exceeded", value: "text-exceeded", icon: "text-exceeded" },
-  medium: { label: "Medium", row: "bg-missing-soft", pill: "bg-missing-border/60 text-missing", value: "text-missing", icon: "text-missing" },
-  low: { label: "Low", row: "bg-missing-soft/60", pill: "bg-muted text-muted-foreground", value: "text-missing", icon: "text-missing" },
+  high: { label: "High", row: "bg-exceeded-soft/45 shadow-[inset_3px_0_0_var(--exceeded)]", pill: "bg-exceeded-soft text-exceeded ring-1 ring-exceeded-border/70", value: "text-exceeded", icon: "text-exceeded" },
+  medium: { label: "Medium", row: "bg-missing-soft/45 shadow-[inset_3px_0_0_var(--missing)]", pill: "bg-missing-soft text-missing ring-1 ring-missing-border/70", value: "text-missing", icon: "text-missing" },
+  low: { label: "Low", row: "bg-muted/45 shadow-[inset_3px_0_0_var(--border)]", pill: "bg-muted text-muted-foreground ring-1 ring-border", value: "text-missing", icon: "text-missing" },
 } as const;
 
 export const SHOWN_ALERTS = 3;
