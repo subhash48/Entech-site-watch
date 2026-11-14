@@ -65,21 +65,21 @@ function SearchBox() {
   return (
     <form
       role="search"
-      className="relative min-w-0 flex-1 lg:w-[22rem] lg:flex-none xl:w-[24rem]"
+      className="relative min-w-0 flex-1 lg:w-[20rem] lg:flex-none xl:w-[23rem]"
       onSubmit={(e) => {
         e.preventDefault();
         const q = query.trim();
         router.push(q ? `/sensors?q=${encodeURIComponent(q)}` : "/sensors");
       }}
     >
-      <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3.5 size-[1.15rem] -translate-y-1/2 text-muted-foreground" />
+      <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
       <input
         ref={inputRef}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search sites, sensors, alerts…"
         aria-label="Search sensor readings"
-        className="h-11 w-full rounded-xl border bg-card pr-16 pl-10 text-sm shadow-card outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25"
+        className="h-10 w-full rounded-xl border bg-card pr-16 pl-9 text-sm shadow-card outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25"
       />
       <kbd className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-md border bg-muted px-1.5 py-0.5 font-sans text-[11px] text-muted-foreground sm:block">
         {mac ? "⌘ K" : "Ctrl K"}
@@ -96,9 +96,9 @@ function Notifications() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button type="button" aria-label={`Notifications: ${count} threshold exceedances`} data-testid="notifications"
-          className="relative flex size-11 shrink-0 items-center justify-center rounded-xl text-foreground hover:bg-card focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none">
-          <Bell className="size-[1.35rem]" />
-          {count > 0 && <span className="absolute top-2.5 right-2.5 size-2.5 rounded-full border-2 border-background bg-[#e5484d]" />}
+          className="relative flex size-10 shrink-0 items-center justify-center rounded-xl text-foreground hover:bg-card focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none">
+          <Bell className="size-5" />
+          {count > 0 && <span className="absolute top-2 right-2 size-2.5 rounded-full border-2 border-background bg-[#e5484d]" />}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
@@ -136,8 +136,8 @@ function AccountMenu() {
       <DropdownMenuTrigger asChild>
         <button type="button" aria-label="Workspace menu"
           className="flex shrink-0 items-center gap-1.5 rounded-full p-0.5 pr-1 hover:bg-card focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none">
-          <span className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2b5bd7] to-[#0b1f47] text-white shadow-card">
-            <UserRound className="size-5" />
+          <span className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#2b5bd7] to-[#0b1f47] text-white shadow-card">
+            <UserRound className="size-[1.1rem]" />
           </span>
           <ChevronDown className="size-4 text-muted-foreground" />
         </button>
