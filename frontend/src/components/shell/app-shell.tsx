@@ -29,7 +29,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset className="min-w-0 bg-background">
         <AppHeader />
-        <div className="w-full max-w-[1600px] flex-1 px-4 pt-5 pb-8 sm:px-6 lg:px-8">{children}</div>
+        <div className="w-full max-w-[1680px] flex-1 px-4 pt-4 pb-6 sm:px-6 lg:px-7">{children}</div>
       </SidebarInset>
       <ChatLauncher />
     </SidebarProvider>
