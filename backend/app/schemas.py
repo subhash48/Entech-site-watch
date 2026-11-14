@@ -142,11 +142,26 @@ class Validation(BaseModel):
     invalid_rows: list[InvalidRow] = Field(description="Rows classified MISSING_DATA and why")
 
 
+class DatasetInfo(BaseModel):
+    """The dataset every endpoint and the assistant are currently using."""
+    id: str = Field(description="'starter' for the read-only dataset committed with the app")
+    version: int = Field(description="0 = starter; uploads are numbered 1, 2, 3, ...")
+    name: str
+    source: Literal["starter", "upload"]
+    status: Literal["active"] = "active"
+    created_at: datetime | None = Field(None, description="Upload time (null for the starter dataset)")
+    created_by: str | None = None
+    activated_at: datetime | None = Field(None, description="When this version became active")
+    readings_filename: str
+    thresholds_filename: str
+
+
 class DataSource(BaseModel):
-    type: Literal["static_files"] = "static_files"
+    type: Literal["static_files", "uploaded_dataset"] = "static_files"
     files: list[str]
     loaded_at: datetime
     note: str
+    dataset: DatasetInfo
 
 
 class Overview(BaseModel):
@@ -202,6 +217,8 @@ class Health(BaseModel):
     data_warnings: int
     loaded_at: datetime
     ai_configured: bool
+    dataset: DatasetInfo
+    storage: Literal["postgres", "sqlite", "none"] = Field(description="Where uploaded datasets are stored")
 
 
 # ---------- AI assistant ----------

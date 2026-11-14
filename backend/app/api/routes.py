@@ -13,7 +13,7 @@ from app.errors import APIError
 from app.schemas import (ChatRequest, ChatResponse, ChatStatus, ErrorResponse, Exceedance, Health, Overview, Page,
                          Reading, ReadingStatus, SensorInfo, SiteDetail, SiteSummary, Summary, Threshold)
 from app.services import queries
-from app.services.dataset import Dataset, load_dataset
+from app.services.dataset import Dataset
 from app.services.overview import build_overview
 from app.services.reporting import build_summary
 
@@ -25,8 +25,9 @@ def get_settings(request: Request) -> Settings:
     return request.app.state.settings
 
 
-def get_dataset(settings: Annotated[Settings, Depends(get_settings)]) -> Dataset:
-    return load_dataset(settings)
+def get_dataset(request: Request) -> Dataset:
+    """The active dataset version, resolved once per request (all endpoints and AI tools share it)."""
+    return request.app.state.datasets.active_dataset()
 
 
 def get_llm(request: Request) -> LLMProvider | None:
@@ -56,12 +57,13 @@ def not_configured_message(settings: Settings) -> str:
 
 
 @router.get("/health", response_model=Health, tags=["system"])
-def health(ds: DatasetDep, settings: SettingsDep):
-    """Liveness and data check. Returns 503 if the data files cannot be loaded."""
+def health(request: Request, ds: DatasetDep, settings: SettingsDep):
+    """Liveness and data check. Returns 503 if the active dataset cannot be loaded."""
     return Health(status="ok", version=__version__, environment=settings.environment,
                   readings_loaded=len(ds.readings), sites_loaded=len(ds.sites),
                   thresholds_loaded=len(ds.thresholds), data_warnings=len(ds.warnings),
-                  loaded_at=ds.loaded_at, ai_configured=settings.ai_configured)
+                  loaded_at=ds.loaded_at, ai_configured=settings.ai_configured, dataset=ds.info,
+                  storage=request.app.state.datasets.store.mode)
 
 
 @router.get("/api/overview", response_model=Overview, tags=["overview"])

@@ -5,9 +5,18 @@ from datetime import datetime, timezone
 
 from app.config import Settings
 from app.errors import DataLoadError
-from app.schemas import Reading, Site, Threshold
+from app.schemas import DatasetInfo, Reading, Site, Threshold
 from app.services.readings import SITE_ID_RE, RawRow, evaluate_row, load_rows
 from app.services.thresholds import load_thresholds
+
+
+STARTER_ID, STARTER_NAME = "starter", "Starter dataset"
+
+
+def starter_info(activated_at: datetime | None = None) -> DatasetInfo:
+    """The read-only dataset committed with the app (backend/data), used until an upload is activated."""
+    return DatasetInfo(id=STARTER_ID, version=0, name=STARTER_NAME, source="starter", activated_at=activated_at,
+                       readings_filename="readings.csv", thresholds_filename="thresholds.json")
 
 
 @dataclass(frozen=True)
@@ -17,6 +26,7 @@ class Dataset:
     thresholds: dict[str, Threshold]
     warnings: list[str]               # file-level problems (threshold config, site names)
     loaded_at: datetime
+    info: DatasetInfo | None = None   # which version this is (set by the dataset service)
 
     @property
     def site_ids(self) -> set[str]:

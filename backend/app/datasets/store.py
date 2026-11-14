@@ -22,12 +22,12 @@ from typing import Any, Iterable
 from urllib.parse import parse_qs, unquote, urlparse
 
 from app.errors import DataLoadError
+from app.services.dataset import STARTER_ID
 from app.services.readings import RawRow
 
 log = logging.getLogger("sitewatch.datasets")
 MIGRATIONS_DIR = Path(__file__).resolve().parents[2] / "migrations"
 INSERT_CHUNK = 500          # rows per multi-row INSERT (9 parameters each)
-STARTER_ID = "starter"
 
 
 class StorageError(Exception):

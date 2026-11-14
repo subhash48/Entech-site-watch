@@ -11,6 +11,7 @@ from app import __version__
 from app.ai.provider import build_provider
 from app.api.routes import router
 from app.config import Settings
+from app.datasets.service import DatasetService
 from app.errors import register_error_handlers
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -25,6 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     app.state.llm = build_provider(settings)  # None when no AI key is configured
+    app.state.datasets = DatasetService(settings)  # active dataset version for every request
     # GET for data, POST only for /api/chat. No cookies/credentials are accepted cross-origin.
     app.add_middleware(
         CORSMiddleware,

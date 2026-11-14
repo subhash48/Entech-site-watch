@@ -16,8 +16,10 @@ THRESHOLDS = {"vibration_ppv": {"limit": 0.5, "unit": "in/s"},
 
 
 def settings_for(readings: Path, thresholds: Path) -> Settings:
+    # on_vercel=True with no DATABASE_URL = read-only storage: these tests use the starter files and never
+    # create a local database. Dataset upload tests configure their own temporary SQLite store.
     return Settings(readings_path=readings, thresholds_path=thresholds, cors_origins=[ORIGIN],
-                    environment="test", docs_paths=[REPO_DIR / "README.md", REPO_DIR / "docs"])
+                    environment="test", docs_paths=[REPO_DIR / "README.md", REPO_DIR / "docs"], on_vercel=True)
 
 
 @pytest.fixture
