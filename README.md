@@ -208,7 +208,7 @@ Every error has the same shape: `{"error": {"code": "SITE_NOT_FOUND", "message":
   - Each turn is limited to 5 model steps, 6 tool calls per step, 12,000 characters per tool output, a time limit and a 6,000-character answer.
   - Instruction-like lines in retrieved documents are removed, and the model is told to ignore instructions inside tool results.
   - There are no tools that write files, run commands or reach other systems.
-- **Configuration (`backend/.env`):** `AI_PROVIDER` (`anthropic` or `groq`), `ANTHROPIC_API_KEY` or `GROQ_API_KEY`, `AI_MODEL` (default `claude-opus-5-5`, or `openai/gpt-oss-120b` for Groq), `AI_EFFORT`, `AI_TIMEOUT_SECONDS`, `AI_MAX_TOOL_ITERATIONS`. Providers sit behind a small interface (`app/ai/provider.py`).
+- **Configuration (`backend/.env`):** `AI_PROVIDER` (`anthropic` or `groq`), `ANTHROPIC_API_KEY` or `GROQ_API_KEY`, `AI_MODEL` (default `claude-opus-5-5`, or `openai/gpt-oss-120b` for Groq), `AI_EFFORT`, `AI_TIMEOUT_SECONDS`, `AI_MAX_TOOL_ITERATIONS`. Providers sit behind a small interface (`app/ai/provider.py`): Anthropic uses the `anthropic` SDK and Groq uses the official `groq` SDK.
 - **Groq rate limits:** Groq's free tier allows about 8,000 tokens per minute for `openai/gpt-oss-120b`, roughly one or two multi-step questions a minute. The backend waits and retries once for short limits and otherwise answers with HTTP 429 and the suggested wait time.
 
 ## Troubleshooting

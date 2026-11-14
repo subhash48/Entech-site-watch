@@ -1,15 +1,15 @@
 """Groq provider: config, OpenAI-format translation, the full tool loop through /api/chat, and error mapping.
 
-Groq's HTTP endpoint is replaced by a scripted fake, so these tests never call the network.
+The real `groq` SDK runs against a mocked HTTP transport (httpx.MockTransport), so request serialization,
+response parsing and the SDK's own exception types are exercised without any network call.
 """
-import io
 import json
-import urllib.error
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from app.ai.provider import GroqProvider, build_provider
+from app.ai.provider import AnthropicProvider, GroqProvider, build_provider
 from app.errors import APIError
 from app.main import create_app
 from tests.conftest import DATA_DIR, settings_for
@@ -29,30 +29,42 @@ def completion(content=None, tool_calls=None, finish="stop"):
         msg["tool_calls"] = [{"id": f"call_{i}", "type": "function",
                               "function": {"name": n, "arguments": json.dumps(a) if isinstance(a, dict) else a}}
                              for i, (n, a) in enumerate(tool_calls)]
-    return {"model": "openai/gpt-oss-120b", "choices": [{"index": 0, "message": msg, "finish_reason": finish}]}
-
-
-class FakeGroq:
-    """Stands in for GroqProvider._post: returns scripted responses (or raises) and records payloads."""
-
-    def __init__(self, *steps):
-        self.steps, self.payloads = list(steps), []
-
-    def __call__(self, payload):
-        self.payloads.append(json.loads(json.dumps(payload)))
-        step = self.steps.pop(0)
-        if isinstance(step, Exception):
-            raise step
-        return step
+    return {"id": "chatcmpl-test", "object": "chat.completion", "created": 1_790_000_000,
+            "model": "openai/gpt-oss-120b",
+            "choices": [{"index": 0, "message": msg, "finish_reason": finish, "logprobs": None}]}
 
 
 def http_error(code, body, headers=None):
-    return urllib.error.HTTPError(GroqProvider.URL, code, "err", headers or {}, io.BytesIO(json.dumps(body).encode()))
+    return ("http_error", code, body, headers or {})
 
 
-def client_with(fake, monkeypatch, **over):
-    monkeypatch.setattr(GroqProvider, "_post", lambda self, payload: fake(payload))
-    return TestClient(create_app(groq_settings(**over)))
+class FakeGroq:
+    """httpx transport handler: returns scripted Groq responses (or raises) and records request payloads."""
+
+    def __init__(self, *steps):
+        self.steps, self.payloads, self.headers = list(steps), [], []
+
+    def __call__(self, request: httpx.Request) -> httpx.Response:
+        assert request.url.path.endswith("/openai/v1/chat/completions")
+        self.payloads.append(json.loads(request.content))
+        self.headers.append(request.headers)
+        step = self.steps.pop(0)
+        if isinstance(step, Exception):
+            raise step
+        if isinstance(step, tuple) and step[0] == "http_error":
+            _, code, body, headers = step
+            return httpx.Response(code, json=body, headers=headers)
+        return httpx.Response(200, json=step)
+
+
+def provider_with(fake, **over) -> GroqProvider:
+    return GroqProvider(groq_settings(**over), http_client=httpx.Client(transport=httpx.MockTransport(fake)))
+
+
+def client_with(fake, monkeypatch=None, **over):
+    app = create_app(groq_settings(**over))
+    app.state.llm = provider_with(fake, **over)
+    return TestClient(app)
 
 
 def ask(c, text):
@@ -162,13 +174,13 @@ def test_tool_use_failed_and_5xx_are_retried_once(monkeypatch):
 
 
 def test_timeout_is_retried_then_reported(monkeypatch):
-    fake = FakeGroq(TimeoutError(), TimeoutError())
+    fake = FakeGroq(httpx.ReadTimeout("slow"), httpx.ReadTimeout("slow"))
     res = ask(client_with(fake, monkeypatch), "How many sites are there?")
     assert res.status_code == 504 and res.json()["error"]["code"] == "AI_TIMEOUT"
 
 
 def test_unreachable(monkeypatch):
-    fake = FakeGroq(urllib.error.URLError("no route"))
+    fake = FakeGroq(httpx.ConnectError("no route"), httpx.ConnectError("no route"))
     assert ask(client_with(fake, monkeypatch), "How many sites are there?").json()["error"]["code"] == "AI_UNREACHABLE"
 
 
@@ -184,8 +196,7 @@ def test_translation_of_foreign_assistant_blocks():
 
 
 def test_error_raises_api_error_directly():
-    p = GroqProvider(groq_settings())
-    p._post = FakeGroq(http_error(401, {}))
+    p = provider_with(FakeGroq(http_error(401, {})))
     with pytest.raises(APIError) as e:
         p.create("s", [{"role": "user", "content": "q"}], [])
     assert e.value.code == "AI_AUTH_FAILED"
@@ -245,3 +256,42 @@ def test_readings_tool_states_its_ordering_and_how_to_find_maximums():
     assert (top["items"][0]["site_id"], top["items"][0]["value"]) == ("S1", 0.62)
     schema = next(t for t in tool_definitions() if t["name"] == "get_readings")["input_schema"]
     assert "sort=value" in schema["properties"]["sort"]["description"]
+
+
+# ---------- SDK specifics and backward compatibility ----------
+
+def test_sdk_sends_bearer_key_and_gpt_oss_options(monkeypatch):
+    fake = FakeGroq(completion("Three sites are monitored."))
+    ask(client_with(fake), "How many sites are there?")
+    assert fake.headers[0]["authorization"] == f"Bearer {SECRET}"
+    body = fake.payloads[0]
+    assert body["model"] == "openai/gpt-oss-120b" and body["include_reasoning"] is False
+    assert body["tool_choice"] == "auto" and body["messages"][0]["role"] == "system"
+
+
+def test_multi_iteration_tool_loop(monkeypatch):
+    """Three model turns: two rounds of tool calls, then the grounded answer."""
+    fake = FakeGroq(completion(tool_calls=[("get_sites", {})], finish="tool_calls"),
+                    completion(tool_calls=[("get_site_details", {"site_id": "S2"}),
+                                           ("get_thresholds", {})], finish="tool_calls"),
+                    completion("S2 (40 Atlantic Ave) exceeded the dust limit: 171 ug/m3 against 150."))
+    body = ask(client_with(fake), "Which site exceeded the dust limit and by how much?").json()
+    assert [t["name"] for t in body["tool_calls"]] == ["get_sites", "get_site_details", "get_thresholds"]
+    assert all(t["ok"] for t in body["tool_calls"]) and "171" in body["answer"]
+    roles = [m["role"] for m in fake.payloads[2]["messages"]]
+    assert roles == ["system", "user", "assistant", "tool", "assistant", "tool", "tool"]
+    ids = [m["tool_call_id"] for m in fake.payloads[2]["messages"] if m["role"] == "tool"]
+    assert ids == ["call_0", "call_0", "call_1"]
+
+
+def test_malformed_response_is_reported(monkeypatch):
+    fake = FakeGroq({"id": "x", "object": "chat.completion", "created": 1, "model": "m", "choices": []})
+    res = ask(client_with(fake), "How many sites are there?")
+    assert res.status_code == 502 and res.json()["error"]["code"] == "AI_PROVIDER_ERROR"
+
+
+def test_anthropic_provider_still_selected_for_anthropic():
+    s = settings_for(DATA_DIR / "readings.csv", DATA_DIR / "thresholds.json")
+    s = s.__class__(**{**s.__dict__, "ai_provider": "anthropic", "anthropic_api_key": "sk-ant-test"})
+    assert isinstance(build_provider(s), AnthropicProvider)
+    assert build_provider(s.__class__(**{**s.__dict__, "anthropic_api_key": None})) is None

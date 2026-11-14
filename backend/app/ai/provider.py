@@ -1,14 +1,11 @@
-"""LLM provider interface and the Anthropic (Claude) implementation.
+"""LLM provider interface with Anthropic (Claude) and Groq implementations.
 
 The agent only depends on `LLMProvider`, so another provider can be added by implementing
 `create()`; select it with AI_PROVIDER: "anthropic" (Claude) or "groq" (OpenAI-compatible API).
 """
 import json
 import logging
-import socket
 import time
-import urllib.error
-import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -95,24 +92,28 @@ class AnthropicProvider:
 
 
 class GroqProvider:
-    """Groq's OpenAI-compatible Chat Completions API with tool calling (e.g. openai/gpt-oss-120b).
+    """Groq (OpenAI-compatible Chat Completions with function calling) through the official `groq` SDK,
+    e.g. AI_MODEL=openai/gpt-oss-120b.
 
     The agent keeps its conversation in the Anthropic shape (tool_use / tool_result blocks); this class
-    translates it to OpenAI messages on every call. Uses only the standard library.
+    translates it to OpenAI messages on every call, so multi-step tool loops work unchanged.
     """
     name = "groq"
-    URL = "https://api.groq.com/openai/v1/chat/completions"
     EFFORT = {"low": "low", "medium": "medium", "high": "high", "xhigh": "high", "max": "high"}
     # Groq counts the requested completion budget against the tokens-per-minute limit (8K on the
     # free tier), so keep it modest; answers are capped at ~250 words.
     MAX_COMPLETION_TOKENS = 2048
     MAX_RATE_LIMIT_WAIT = 20.0   # seconds; a longer wait is reported to the user instead
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, http_client: Any = None):
+        import groq  # imported lazily so the API runs without the SDK when AI is off
+
+        self._groq = groq
         self.model = settings.ai_model
         self.effort = self.EFFORT.get(settings.ai_effort, "medium")
-        self.timeout = float(settings.ai_timeout_seconds)
-        self._key = settings.groq_api_key
+        # Retries are handled in _call so rate limits and malformed tool calls follow our own policy.
+        self.client = groq.Groq(api_key=settings.groq_api_key, timeout=float(settings.ai_timeout_seconds),
+                                max_retries=0, http_client=http_client)
 
     # ---- message translation ----
 
@@ -157,65 +158,57 @@ class GroqProvider:
                                                          "parameters": schema}})
         return out
 
-    # ---- HTTP ----
+    # ---- API calls ----
 
     def _post(self, payload: dict) -> dict:
-        req = urllib.request.Request(self.URL, data=json.dumps(payload).encode(), method="POST", headers={
-            "Authorization": f"Bearer {self._key}", "Content-Type": "application/json",
-            "Accept": "application/json", "User-Agent": "sitewatch-api"})
-        with urllib.request.urlopen(req, timeout=self.timeout) as res:
-            return json.loads(res.read().decode("utf-8"))
+        return self.client.chat.completions.create(**payload).model_dump()
 
     def _call(self, payload: dict) -> dict:
         """One retry for transient failures and Groq's 400 tool_use_failed (malformed tool call)."""
+        g = self._groq
         for attempt in (1, 2):
             try:
                 return self._post(payload)
-            except urllib.error.HTTPError as e:
-                body = e.read().decode("utf-8", "replace")
-                try:
-                    err = json.loads(body).get("error", {})
-                except ValueError:
-                    err = {}
+            except g.APITimeoutError:
+                if attempt == 1:
+                    continue
+                raise APIError(504, "AI_TIMEOUT", "The AI provider took too long to respond. Please try again.") from None
+            except g.APIConnectionError:
+                if attempt == 1:
+                    continue
+                raise APIError(502, "AI_UNREACHABLE", "Could not reach the AI provider. Check network access.") from None
+            except g.APIStatusError as e:
+                err = _error_body(e.body)
                 code = err.get("code") or ""
                 if code == "tool_use_failed":
                     log.warning("Groq rejected a tool call (attempt %d): %s | generated: %.300s", attempt,
                                 err.get("message"), json.dumps(err.get("failed_generation")))
-                wait = _retry_after(e.headers)
-                retryable = e.code >= 500 or (e.code == 400 and code == "tool_use_failed")
-                if attempt == 1 and e.code == 429 and wait is not None and wait <= self.MAX_RATE_LIMIT_WAIT:
+                status = e.status_code
+                wait = _retry_after(e.response.headers if e.response is not None else None)
+                if attempt == 1 and status == 429 and wait is not None and wait <= self.MAX_RATE_LIMIT_WAIT:
                     time.sleep(wait + 0.25)
                     continue
-                if attempt == 1 and retryable:
+                if attempt == 1 and (status >= 500 or (status == 400 and code == "tool_use_failed")):
                     continue
-                if e.code == 401:
+                if status == 401:
                     raise APIError(502, "AI_AUTH_FAILED", "The AI provider rejected the configured API key. "
                                    "Check GROQ_API_KEY in the backend environment.") from None
-                if e.code == 403:
+                if status == 403:
                     raise APIError(502, "AI_PERMISSION_DENIED", "The configured API key cannot use this model. "
                                    "Check AI_MODEL and your Groq account access.") from None
-                if e.code == 404:
+                if status == 404:
                     raise APIError(502, "AI_MODEL_NOT_FOUND", f"The AI model '{self.model}' was not found.") from None
-                if e.code == 413:
+                if status == 413:
                     raise APIError(429, "AI_RATE_LIMITED", "This question needs more tokens than the Groq plan's "
                                    "per-minute limit allows. Ask a narrower question, for example about one site.") from None
-                if e.code == 429:
+                if status == 429:
                     when = f"in about {int(wait) + 1} seconds" if wait is not None else "shortly"
                     raise APIError(429, "AI_RATE_LIMITED", "The AI provider's rate limit was reached (Groq "
                                    f"tokens per minute). Please try again {when}.") from None
                 raise APIError(502, "AI_PROVIDER_ERROR",
-                               f"The AI provider returned an error (HTTP {e.code}{', ' + code if code else ''}).") from None
-            except (TimeoutError, socket.timeout):
-                if attempt == 1:
-                    continue
-                raise APIError(504, "AI_TIMEOUT", "The AI provider took too long to respond. Please try again.") from None
-            except urllib.error.URLError as e:
-                if isinstance(e.reason, (TimeoutError, socket.timeout)):
-                    if attempt == 1:
-                        continue
-                    raise APIError(504, "AI_TIMEOUT", "The AI provider took too long to respond. "
-                                   "Please try again.") from None
-                raise APIError(502, "AI_UNREACHABLE", "Could not reach the AI provider. Check network access.") from None
+                               f"The AI provider returned an error (HTTP {status}{', ' + code if code else ''}).") from None
+            except g.APIError:   # e.g. a response that does not match the expected schema
+                raise APIError(502, "AI_PROVIDER_ERROR", "The AI provider returned an unexpected response.") from None
         raise AssertionError("unreachable")
 
     def create(self, system: str, messages: list[dict], tools: list[dict]) -> ProviderTurn:
@@ -259,6 +252,14 @@ def _retry_after(headers) -> float | None:
     except (TypeError, ValueError):
         return None
     return max(0.0, value) if value is not None else None
+
+
+def _error_body(body: Any) -> dict:
+    """Groq error details; the SDK may give the whole JSON body or just its "error" object."""
+    if isinstance(body, dict):
+        inner = body.get("error")
+        return inner if isinstance(inner, dict) else body
+    return {}
 
 
 PROVIDERS = {"anthropic": AnthropicProvider, "groq": GroqProvider}
