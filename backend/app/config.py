@@ -66,6 +66,8 @@ class Settings:
     database_url: str | None = field(default=None, repr=False)
     sqlite_path: Path = BASE_DIR / ".local" / "sitewatch.sqlite3"
     on_vercel: bool = False
+    # Shared secret for dataset management (sign-in). Unset = upload/activation disabled.
+    admin_token: str | None = field(default=None, repr=False)
 
     @property
     def ai_configured(self) -> bool:
@@ -101,4 +103,5 @@ class Settings:
             database_url=os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or None,
             sqlite_path=Path(os.getenv("SQLITE_PATH") or BASE_DIR / ".local" / "sitewatch.sqlite3"),
             on_vercel=bool(os.getenv("VERCEL")),
+            admin_token=(os.getenv("ADMIN_TOKEN") or "").strip() or None,
         )

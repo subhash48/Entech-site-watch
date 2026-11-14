@@ -138,8 +138,14 @@ def test_cors_allows_configured_origin_only(client):
     assert ok.headers["access-control-allow-origin"] == ORIGIN
     bad = client.get("/api/sites", headers={"Origin": "https://evil.example"})
     assert "access-control-allow-origin" not in bad.headers
-    preflight = client.options("/api/sites", headers={"Origin": ORIGIN, "Access-Control-Request-Method": "DELETE"})
+    preflight = client.options("/api/sites", headers={"Origin": ORIGIN, "Access-Control-Request-Method": "PUT"})
     assert preflight.status_code == 400
+    # The admin header and credentials are granted to the configured origin only.
+    admin = {"Access-Control-Request-Method": "POST", "Access-Control-Request-Headers": "x-sitewatch-admin"}
+    good = client.options("/api/datasets", headers={"Origin": ORIGIN, **admin})
+    assert good.status_code == 200 and good.headers["access-control-allow-credentials"] == "true"
+    evil = client.options("/api/datasets", headers={"Origin": "https://evil.example", **admin})
+    assert evil.status_code == 400 and "access-control-allow-origin" not in evil.headers
 
 
 def test_unknown_route_and_method(client):
