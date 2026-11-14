@@ -45,10 +45,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <SidebarHeader className="px-4 pt-6 pb-4 group-data-[collapsible=icon]:px-2">
+      <SidebarHeader className="px-4 pt-5 pb-3 group-data-[collapsible=icon]:px-2">
         <Link href="/" className="flex items-center gap-2.5 px-1" onClick={() => isMobile && setOpenMobile(false)}>
-          <LogoMark className="size-8 shrink-0" />
-          <span className="truncate text-[1.35rem] font-bold tracking-tight text-white group-data-[collapsible=icon]:hidden">
+          <LogoMark className="size-7 shrink-0" />
+          <span className="truncate text-[1.2rem] font-bold tracking-tight text-white group-data-[collapsible=icon]:hidden">
             SiteWatch AI
           </span>
         </Link>
