@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Bell, Info } from "lucide-react";
+import { ArrowRight, Bell } from "lucide-react";
 import { DashCard } from "@/components/dashboard/dash-card";
 import { sensorMeta } from "@/components/dashboard/sensor-meta";
 import { EmptyState } from "@/components/states";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDate, formatNumber, formatTime } from "@/lib/format";
 import type { Exceedance } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -16,12 +15,15 @@ const SEVERITY = {
 } as const;
 
 export const SHOWN_ALERTS = 3;
+const SEVERITY_NOTE = "Severity is how far above the configured limit: High is 20% or more over, Medium 5% to under " +
+  "20%, Low under 5%. A display priority only, not a regulatory classification.";
 
 export function AlertsCard({ alerts, total, multiDay }: { alerts: Exceedance[]; total: number; multiDay: boolean }) {
   const shown = alerts.slice(0, SHOWN_ALERTS);
   return (
     <DashCard icon={Bell} title="Sensor Alerts" testId="alerts-card" className="xl:h-[17.5rem]"
       subtitle={total ? `Latest ${shown.length} of ${total} threshold exceedance${total === 1 ? "" : "s"}` : "Recent threshold exceedances"}
+      info={total > 0 ? SEVERITY_NOTE : undefined}
       action={<Link href="/alerts" className="inline-flex shrink-0 items-center gap-1 text-[0.8rem] font-semibold text-primary hover:underline">View All Alerts <ArrowRight className="size-3.5" /></Link>}>
       {shown.length === 0 ? (
         <EmptyState title="No exceedances" description="No reading exceeded its configured limit for these filters." className="py-8" />
@@ -57,19 +59,6 @@ export function AlertsCard({ alerts, total, multiDay }: { alerts: Exceedance[]; 
             );
           })}
         </ul>
-      )}
-      {total > 0 && (
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-          Severity = how far above the configured limit
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button type="button" aria-label="How severity is calculated"><Info className="size-3.5" /></button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              High: 20% or more over the limit. Medium: 5% to under 20%. Low: under 5%. A display priority only, not a regulatory classification.
-            </TooltipContent>
-          </Tooltip>
-        </p>
       )}
     </DashCard>
   );

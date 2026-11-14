@@ -1,9 +1,12 @@
-import type { LucideIcon } from "lucide-react";
+import { Info, type LucideIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 /** Card chrome used across the dashboard: icon, title, subtitle and an optional action. */
-export function DashCard({ icon: Icon, title, subtitle, action, children, className, bodyClassName, testId }: {
+export function DashCard({ icon: Icon, title, subtitle, info, action, children, className, bodyClassName, testId }: {
   icon: LucideIcon; title: string; subtitle?: React.ReactNode; action?: React.ReactNode; children: React.ReactNode;
+  /** Optional explanation shown from an info button next to the title. */
+  info?: string;
   className?: string; bodyClassName?: string; testId?: string;
 }) {
   return (
@@ -13,7 +16,19 @@ export function DashCard({ icon: Icon, title, subtitle, action, children, classN
           <Icon className="size-4" strokeWidth={2} />
         </span>
         <div className="min-w-[9rem] flex-1">
-          <h2 className="text-base leading-tight font-bold tracking-tight">{title}</h2>
+          <h2 className="flex items-center gap-1.5 text-base leading-tight font-bold tracking-tight">
+            {title}
+            {info && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" aria-label={`About ${title}`} className="text-muted-foreground hover:text-foreground">
+                    <Info className="size-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs font-normal">{info}</TooltipContent>
+              </Tooltip>
+            )}
+          </h2>
           {subtitle && <p className="truncate text-[0.8rem] text-muted-foreground">{subtitle}</p>}
         </div>
         {action}
