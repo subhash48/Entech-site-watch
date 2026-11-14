@@ -101,7 +101,7 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
   const total = series.reduce((n, s) => n + (mode === "alerts" ? s.exceeded : s.readings), 0);
 
   return (
-    <DashCard icon={TrendingUp} title="Alert Trends" testId="trends-card" className="xl:h-[25rem]"
+    <DashCard icon={TrendingUp} title="Alert Trends" testId="trends-card" className="h-[21rem] xl:h-[19rem]"
       subtitle={mode === "alerts" ? "Cumulative threshold exceedances by sensor type" : "Readings received by sensor type"}
       action={
         <div role="group" aria-label="Chart mode" className="flex shrink-0 rounded-xl border bg-muted p-1">
@@ -118,9 +118,9 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
         <EmptyState title="No timestamped readings" description="Nothing to chart for these filters." className="py-8" />
       ) : (
         <div className="flex h-full min-h-0 flex-col gap-4 sm:flex-row">
-          <div className="flex min-h-[220px] min-w-0 flex-1 flex-col">
-            <ChartContainer config={{}} className="aspect-auto h-full min-h-[200px] w-full" data-testid="trends-chart">
-              <AreaChart data={rows} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
+          <div className="flex min-h-[170px] min-w-0 flex-1 flex-col">
+            <ChartContainer config={{}} className="aspect-auto h-full min-h-[160px] w-full" data-testid="trends-chart">
+              <AreaChart data={rows} margin={{ top: 6, right: 8, left: -14, bottom: 0 }}>
                 <defs>
                   {series.map((s) => (
                     <linearGradient key={s.key} id={`fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
@@ -130,18 +130,17 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
                   ))}
                 </defs>
                 <CartesianGrid vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="label" tickLine={false} axisLine={{ stroke: "var(--border)" }} fontSize={12} tickMargin={8} />
-                <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={12} width={36}
-                  label={{ value: mode === "alerts" ? "Alerts" : "Readings", angle: -90, position: "insideLeft", offset: 14, fontSize: 12, fill: "var(--muted-foreground)" }} />
+                <XAxis dataKey="label" tickLine={false} axisLine={{ stroke: "var(--border)" }} fontSize={11} tickMargin={6} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={11} width={36} />
                 <Tooltip content={<TrendTooltip mode={mode} />} />
                 {series.map((s) => (
                   <Area key={s.key} dataKey={s.key} name={s.name} type="monotone" stroke={s.color} strokeWidth={2.5}
                     fill={`url(#fill-${s.key})`} isAnimationActive={false}
-                    dot={{ r: 4, fill: "var(--card)", stroke: s.color, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                    dot={{ r: 3, fill: "var(--card)", stroke: s.color, strokeWidth: 2 }} activeDot={{ r: 5 }} />
                 ))}
               </AreaChart>
             </ChartContainer>
-            <p className="pt-1 text-xs text-muted-foreground">
+            <p className="pt-0.5 text-[11px] text-muted-foreground">
               {size === DAY ? "Daily" : "Hourly"} buckets · times as recorded{size === HOUR && first ? ` on ${formatDate(first)}` : ""}
             </p>
           </div>
