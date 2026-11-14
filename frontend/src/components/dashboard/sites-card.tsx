@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, ChevronRight, MapPin } from "lucide-react";
+import { ArrowRight, Building2, ChevronRight, MapPin } from "lucide-react";
 import { DashCard } from "@/components/dashboard/dash-card";
 import { EmptyState } from "@/components/states";
 import { sensorType } from "@/lib/format";
@@ -14,8 +14,9 @@ const STATUS: Record<SiteStatus, { label: string; cls: string; dot: string }> = 
 
 export function SitesCard({ sites, total }: { sites: SiteSummary[]; total: number }) {
   return (
-    <DashCard icon={MapPin} title="Sites" testId="sites-card"
-      subtitle={`${total} construction site${total === 1 ? "" : "s"} in the dataset`}>
+    <DashCard icon={MapPin} title="Sites" testId="sites-card" className="xl:h-[17.5rem]" bodyClassName="overflow-y-auto"
+      subtitle={`${total} construction site${total === 1 ? "" : "s"} in the dataset`}
+      action={<Link href="/sites" className="inline-flex shrink-0 items-center gap-1 text-[0.8rem] font-semibold text-primary hover:underline">View All Sites <ArrowRight className="size-3.5" /></Link>}>
       {sites.length === 0 ? (
         <EmptyState title="No sites match these filters" />
       ) : (
