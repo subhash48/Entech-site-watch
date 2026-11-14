@@ -23,8 +23,8 @@ function FilterSelect({ icon: Icon, value, onChange, allLabel, options, label, t
   return (
     <Select value={value || ALL} onValueChange={(v) => onChange(v === ALL ? "" : v)}>
       <SelectTrigger aria-label={label} data-testid={testId}
-        className={cn("h-11! w-full justify-start gap-2.5 rounded-xl bg-card px-3.5 text-sm font-medium shadow-card data-[size=default]:h-11", className)}>
-        <Icon aria-hidden className="size-[1.1rem] shrink-0 text-muted-foreground" />
+        className={cn("h-10! w-full min-w-0 justify-start gap-2 rounded-xl bg-card px-3 text-sm font-medium shadow-card data-[size=default]:h-10", className)}>
+        <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1 truncate text-left"><SelectValue /></span>
       </SelectTrigger>
       <SelectContent>
