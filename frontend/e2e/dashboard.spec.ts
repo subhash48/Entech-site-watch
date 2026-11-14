@@ -255,7 +255,7 @@ test.describe("responsive", () => {
   test.describe("phone", () => {
     test.use({ viewport: { width: 390, height: 844 } });
     test("no horizontal scroll on any page; off-canvas navigation works", async ({ page }) => {
-      for (const path of ["/", "/sites", "/sites/S2", "/alerts", "/sensors", "/reports", "/assistant", "/settings"]) {
+      for (const path of ["/", "/sites", "/sites/S2", "/alerts", "/sensors", "/reports", "/data", "/assistant", "/settings"]) {
         await page.goto(path);
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         await page.waitForLoadState("networkidle");
@@ -275,5 +275,57 @@ test.describe("responsive", () => {
       await expect(page.locator("[data-slot=sidebar]").first()).toHaveAttribute("data-state", "collapsed");
       await expect(page.getByTestId("kpi-alerts-value")).toHaveText("5");
     });
+  });
+});
+
+test.describe("compact dashboard", () => {
+  for (const [width, height] of [[1440, 900], [1920, 1080]]) {
+    test(`fits one ${width}x${height} viewport without horizontal overflow`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      await expect(page.getByTestId("alert-rows").locator("li")).toHaveCount(3);
+      const m = await page.evaluate(() => {
+        const box = (id: string) => document.querySelector(`[data-testid=${id}]`)!.getBoundingClientRect();
+        const table = document.querySelector("[data-testid=sites-table]")!;
+        return {
+          scroll: document.documentElement.scrollHeight - window.innerHeight,
+          overflow: document.documentElement.scrollWidth - window.innerWidth,
+          tableOverflow: table.scrollWidth - table.parentElement!.clientWidth,
+          kpi: box("kpi-sites").height,
+          alertRow: document.querySelector("[data-testid=alert-rows] li")!.getBoundingClientRect().height,
+          assistantBottom: box("assistant-card").bottom,
+        };
+      });
+      expect(m.scroll).toBeLessThanOrEqual(0);
+      expect(m.overflow).toBeLessThanOrEqual(0);
+      expect(m.tableOverflow).toBeLessThanOrEqual(0);
+      expect(m.kpi).toBeGreaterThanOrEqual(90);
+      expect(m.kpi).toBeLessThanOrEqual(105);
+      expect(m.alertRow).toBeGreaterThanOrEqual(56);
+      expect(m.alertRow).toBeLessThanOrEqual(64);
+      expect(m.assistantBottom).toBeLessThanOrEqual(height);
+    });
+  }
+
+  test("AI preview links to the full assistant and keeps only the latest exchange", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.route(`${API}/api/chat/status`, (route) => route.fulfill({
+      json: { configured: true, provider: "groq", model: "openai/gpt-oss-120b", message: "SiteWatch AI is ready." } }));
+    let n = 0;
+    await page.route(`${API}/api/chat`, (route) => route.fulfill({ json: {
+      answer: n++ === 0 ? "First answer." : "Second answer.", sources: [{ type: "data", name: "readings.csv" }],
+      tool_calls: [], refused: false, model: "openai/gpt-oss-120b" } }));
+    await page.goto("/");
+    const card = page.getByTestId("assistant-card");
+    await card.getByRole("button", { name: "Which sites exceeded their limits?" }).click();
+    await expect(card.getByTestId("assistant-message")).toContainText("First answer.");
+    await card.getByLabel("Message SiteWatch AI").fill("And which sensors have missing data?");
+    await card.getByRole("button", { name: "Send message" }).click();
+    await expect(card.getByTestId("assistant-message")).toHaveCount(1);
+    await expect(card.getByTestId("assistant-message")).toContainText("Second answer.");
+    await expect(card.getByTestId("earlier-messages")).toHaveText("2 earlier messages · open the full conversation");
+    await card.getByTestId("open-assistant").click();
+    await expect(page).toHaveURL(/\/assistant$/);
+    await expect(page.getByText("First answer.")).toBeVisible();                // full history on the page
   });
 });
