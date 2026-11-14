@@ -90,20 +90,22 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="relative z-10 mx-3 mb-4 rounded-xl bg-[#081738]/75 px-3 py-2.5 backdrop-blur-[2px] group-data-[collapsible=icon]:hidden">
-        <p className="flex items-center gap-2 text-xs text-sidebar-foreground/80" data-testid="data-source-status"
+      <SidebarFooter
+        className="relative z-10 mx-3 mb-3 gap-0.5 rounded-xl border border-white/10 bg-[#081738]/80 px-3 py-2 backdrop-blur-[2px] group-data-[collapsible=icon]:hidden"
+        title={dataset?.source === "upload" && dataset.created_at
+          ? `Uploaded ${formatLoadedAt(dataset.created_at)}. Static uploaded data, not a live feed.`
+          : "readings.csv and thresholds.json. Static data, not a live feed."}>
+        <p className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground/90" data-testid="data-source-status"
           data-state={error ? "offline" : overview ? "connected" : "connecting"}>
           <span className={cn("size-2 shrink-0 rounded-full", error ? "bg-[#ff6b6b]" : overview ? "bg-[#4ade80]" : "animate-pulse bg-white/50")} />
           {error ? "API offline" : overview ? (dataset?.source === "upload" ? "Uploaded dataset active" : "Static dataset loaded")
             : "Connecting to API…"}
         </p>
-        <p className="truncate text-[11px] leading-relaxed text-sidebar-foreground/80" data-testid="active-dataset-label">
-          {dataset ? `v${dataset.version} · ${dataset.name}` : "readings.csv · thresholds.json"}
-        </p>
-        <p className="text-[11px] leading-relaxed text-sidebar-foreground/60">
-          {dataset?.source === "upload" && dataset.created_at
-            ? `Uploaded ${formatLoadedAt(dataset.created_at)}. Not a live feed.`
-            : "readings.csv · thresholds.json. Not a live feed."}
+        <p className="flex min-w-0 items-center gap-1 pl-4 text-[11px] text-sidebar-foreground/60">
+          <span className="truncate" data-testid="active-dataset-label">
+            {dataset ? `v${dataset.version} · ${dataset.name}` : "readings.csv · thresholds.json"}
+          </span>
+          <span className="shrink-0">· not live</span>
         </p>
       </SidebarFooter>
 
