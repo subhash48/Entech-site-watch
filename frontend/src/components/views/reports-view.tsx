@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, FileDown, FileSpreadsheet } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import { useData } from "@/components/data-provider";
 import { FilterSelect } from "@/components/filter-select";
@@ -10,7 +10,7 @@ import { ErrorState } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/lib/api";
+import { api, exportUrl } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +34,17 @@ export function ReportsView() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-end justify-end gap-2">
+          <Button asChild variant="outline" size="sm">
+            <a href={exportUrl.exceedances({ site_id: siteId || undefined })} download data-testid="report-exceedances-csv">
+              <FileSpreadsheet /> Exceedances CSV
+            </a>
+          </Button>
+          <Button asChild size="sm">
+            <a href={exportUrl.summaryPdf({ site_id: siteId || undefined })} download data-testid="report-pdf">
+              <FileDown /> Download PDF
+            </a>
+          </Button>
           <FilterSelect label="Scope" value={siteId} onChange={setSiteId} allLabel="All sites" testId="report-scope"
             options={(overview?.sites ?? []).map((s) => ({ value: s.site_id, label: `${s.site_name} (${s.site_id})` }))} />
       </div>

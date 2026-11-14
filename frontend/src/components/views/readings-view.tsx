@@ -2,7 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, RotateCcw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Download, RotateCcw, Search } from "lucide-react";
+import { SensorCharts } from "@/components/charts/sensor-charts";
 import { useData } from "@/components/data-provider";
 import { FilterSelect } from "@/components/filter-select";
 import { ReadingStatusBadge, rowTone, STATUS_LABEL } from "@/components/status";
@@ -12,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/lib/api";
+import { api, exportUrl } from "@/lib/api";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import type { ReadingsQuery, ReadingStatus } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
@@ -120,11 +121,19 @@ function ReadingsExplorer({ initial }: { initial: Filters }) {
             <Input type="datetime-local" value={filters.end} onChange={(e) => update({ end: e.target.value })}
               className="h-8 w-full" aria-label="To time" data-testid="filter-end" />
           </label>
-          {hasFilters && (
-            <Button variant="ghost" size="sm" onClick={() => { setSearch(""); update({ q: "", site_id: "", sensor: "", status: "", start: "", end: "" }); }}>
-              <RotateCcw /> Reset
+          <div className="flex items-center gap-1">
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); update({ q: "", site_id: "", sensor: "", status: "", start: "", end: "" }); }}>
+                <RotateCcw /> Reset
+              </Button>
+            )}
+            <Button asChild variant="outline" size="sm">
+              <a href={exportUrl.readings({ q: query.q, site_id: query.site_id, sensor: query.sensor, status: query.status,
+                start: query.start, end: query.end })} download data-testid="export-readings">
+                <Download /> Export CSV
+              </a>
             </Button>
-          )}
+          </div>
         </div>
 
         {error ? (
@@ -221,5 +230,10 @@ export function ReadingsView() {
     end: "",
   };
   // Re-mount when the URL changes (e.g. a new header search) so filters follow the link.
-  return <ReadingsExplorer key={params.toString()} initial={initial} />;
+  return (
+    <div className="space-y-5">
+      <SensorCharts />
+      <ReadingsExplorer key={params.toString()} initial={initial} />
+    </div>
+  );
 }

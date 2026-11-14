@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CircleDashed } from "lucide-react";
+import { CircleDashed, Download } from "lucide-react";
 import { useData } from "@/components/data-provider";
 import { FilterSelect } from "@/components/filter-select";
 import { EmptyState, ErrorState, TableSkeleton } from "@/components/states";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/lib/api";
+import { api, exportUrl } from "@/lib/api";
 import { formatDateTime, formatNumber, sensorType, titleCase } from "@/lib/format";
 import { useApi } from "@/lib/use-api";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,11 @@ export function AlertsView() {
             options={(overview?.sites ?? []).map((s) => ({ value: s.site_id, label: `${s.site_name} (${s.site_id})` }))} />
           <FilterSelect label="Sensor" value={sensor} onChange={setSensor} allLabel="All sensors" testId="alerts-sensor"
             options={types.map((t) => ({ value: t, label: titleCase(t) }))} />
+          <Button asChild variant="outline" size="sm" className="sm:order-last">
+            <a href={exportUrl.exceedances({ site_id: query.site_id, sensor: query.sensor })} download data-testid="export-exceedances">
+              <Download /> Exceedances CSV
+            </a>
+          </Button>
           {data && (
             <p className="text-sm text-muted-foreground sm:ml-auto tabular" data-testid="alerts-count">
               <span className="font-semibold text-exceeded">{data.length}</span> exceedance{data.length === 1 ? "" : "s"} at {sitesAffected} site{sitesAffected === 1 ? "" : "s"}

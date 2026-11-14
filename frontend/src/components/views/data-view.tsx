@@ -9,6 +9,7 @@ import {
 import { AdminAccess } from "@/components/data/admin-access";
 import { FileDrop, formatBytes } from "@/components/data/file-drop";
 import { HistoryTable } from "@/components/data/history-table";
+import { VersionChart } from "@/components/charts/version-chart";
 import { ComparisonTable, PreviewRows, StatTiles } from "@/components/data/preview-panel";
 import { ValidationReport } from "@/components/data/validation-report";
 import { DashCard } from "@/components/dashboard/dash-card";
@@ -298,8 +299,11 @@ export function DataView() {
       <DashCard icon={History} title="Dataset history" testId="history-card"
         subtitle="Every import is an immutable version. Activate any version to roll back.">
         {history.data ? (
-          <HistoryTable versions={history.data.versions} canActivate={isAdmin && writable} isAdmin={isAdmin}
-            busyId={busyId} onActivate={activateVersion} />
+          <div className="space-y-5">
+            <HistoryTable versions={history.data.versions} canActivate={isAdmin && writable} isAdmin={isAdmin}
+              busyId={busyId} onActivate={activateVersion} />
+            <VersionChart versions={history.data.versions} />
+          </div>
         ) : history.error ? <ErrorState error={history.error} onRetry={history.reload} /> : <Skeleton className="h-32" />}
       </DashCard>
     </div>
