@@ -31,43 +31,43 @@ export function SitesCard({ sites, total }: { sites: SiteSummary[]; total: numbe
               <col className="w-6" />
             </colgroup>
             <thead>
-              <tr className="border-b text-left text-[0.8rem] font-semibold">
-                <th className="px-1 pb-2.5 font-semibold">Site</th>
-                <th className="px-1 pb-2.5 font-semibold">Status</th>
-                <th className="px-1 pb-2.5 text-center font-semibold">Active Alerts</th>
-                <th className="px-1 pb-2.5 text-center font-semibold" title="Readings with a value / readings received">Data Coverage</th>
-                <th className="w-6 pb-2.5"><span className="sr-only">Open</span></th>
+              <tr className="border-b text-left text-xs font-semibold text-muted-foreground">
+                <th className="px-1 pb-2 font-semibold">Site</th>
+                <th className="px-1 pb-2 font-semibold">Status</th>
+                <th className="px-1 pb-2 text-center font-semibold">Alerts</th>
+                <th className="px-1 pb-2 text-center font-semibold" title="Readings with a value / readings received">Coverage</th>
+                <th className="pb-2"><span className="sr-only">Open</span></th>
               </tr>
             </thead>
             <tbody>
               {sites.map((s) => {
                 const st = STATUS[s.status];
                 const withData = s.total_readings - s.missing_data_count;
+                const detail = s.sensors.map((x) => sensorType(x)).join(", ") || "no sensors";
                 return (
                   <tr key={s.site_id} className="group relative border-b last:border-0 hover:bg-muted/50" data-testid={`site-row-${s.site_id}`}>
-                    <td className="px-1 py-2.5">
-                      <Link href={`/sites/${s.site_id}`} className="flex items-center gap-3 after:absolute after:inset-0">
-                        <span className="flex h-11 w-16 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[#1d3f8a] to-[#0b1f47] text-white/90">
-                          <Building2 className="size-5" strokeWidth={1.6} />
+                    <td className="px-1 py-2">
+                      <Link href={`/sites/${s.site_id}`} className="flex min-w-0 items-center gap-2.5 after:absolute after:inset-0"
+                        title={`${s.site_name} (${s.site_id}): ${detail}`}>
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#1d3f8a] to-[#0b1f47] text-white/90">
+                          <Building2 className="size-4" strokeWidth={1.7} />
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate font-semibold">{s.site_name}</span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {s.site_id} · {s.sensors.map((x) => sensorType(x)).join(", ") || "no sensors"}
-                          </span>
+                          <span className="block truncate text-[0.85rem] font-semibold">{s.site_name}</span>
+                          <span className="block truncate text-[11px] text-muted-foreground">{s.site_id} · {detail}</span>
                         </span>
                       </Link>
                     </td>
-                    <td className="px-1 py-2.5">
-                      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap", st.cls)}>
+                    <td className="px-1 py-2">
+                      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap", st.cls)}>
                         <span className={cn("size-1.5 rounded-full", st.dot)} />{st.label}
                       </span>
                     </td>
-                    <td className="px-1 py-2.5 text-center font-semibold tabular">{s.exceeded_count}</td>
-                    <td className="px-1 py-2.5 text-center tabular">
+                    <td className="px-1 py-2 text-center font-semibold tabular">{s.exceeded_count}</td>
+                    <td className="px-1 py-2 text-center whitespace-nowrap tabular">
                       <span className="font-semibold">{withData}</span><span className="text-muted-foreground"> / {s.total_readings}</span>
                     </td>
-                    <td className="py-2.5 text-right">
+                    <td className="py-2 text-right">
                       <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                     </td>
                   </tr>
