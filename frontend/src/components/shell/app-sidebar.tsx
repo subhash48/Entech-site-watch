@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Bell, ChartColumn, House, MapPin, Radio, Settings, Sparkles, type LucideIcon,
+  Bell, ChartColumn, Database, House, MapPin, Radio, Settings, Sparkles, type LucideIcon,
 } from "lucide-react";
 import { useData } from "@/components/data-provider";
 import { LogoMark } from "@/components/shell/logo";
@@ -12,6 +12,7 @@ import {
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton,
   SidebarMenuItem, SidebarRail, useSidebar,
 } from "@/components/ui/sidebar";
+import { formatLoadedAt } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -26,6 +27,7 @@ export const NAV: NavItem[] = [
   { href: "/alerts", label: "Alerts", icon: Bell },
   { href: "/sensors", label: "Sensors", icon: Radio },
   { href: "/reports", label: "Reports", icon: ChartColumn },
+  { href: "/data", label: "Data Management", icon: Database },
   { href: "/assistant", label: "AI Assistant", icon: Sparkles },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -37,6 +39,7 @@ export function isActive(pathname: string, href: string) {
 export function AppSidebar() {
   const pathname = usePathname();
   const { overview, error } = useData();
+  const dataset = overview?.data_source.dataset;
   const { isMobile, setOpenMobile } = useSidebar();
   const alerts = overview?.totals.exceeded_readings ?? 0;
 
@@ -91,10 +94,16 @@ export function AppSidebar() {
         <p className="flex items-center gap-2 text-xs text-sidebar-foreground/80" data-testid="data-source-status"
           data-state={error ? "offline" : overview ? "connected" : "connecting"}>
           <span className={cn("size-2 shrink-0 rounded-full", error ? "bg-[#ff6b6b]" : overview ? "bg-[#4ade80]" : "animate-pulse bg-white/50")} />
-          {error ? "API offline" : overview ? "Static dataset loaded" : "Connecting to API…"}
+          {error ? "API offline" : overview ? (dataset?.source === "upload" ? "Uploaded dataset active" : "Static dataset loaded")
+            : "Connecting to API…"}
+        </p>
+        <p className="truncate text-[11px] leading-relaxed text-sidebar-foreground/80" data-testid="active-dataset-label">
+          {dataset ? `v${dataset.version} · ${dataset.name}` : "readings.csv · thresholds.json"}
         </p>
         <p className="text-[11px] leading-relaxed text-sidebar-foreground/60">
-          readings.csv · thresholds.json. Not a live feed.
+          {dataset?.source === "upload" && dataset.created_at
+            ? `Uploaded ${formatLoadedAt(dataset.created_at)}. Not a live feed.`
+            : "readings.csv · thresholds.json. Not a live feed."}
         </p>
       </SidebarFooter>
 

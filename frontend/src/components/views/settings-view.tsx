@@ -59,6 +59,7 @@ export function SettingsView() {
           <CardHeader><CardTitle>Data source</CardTitle><CardDescription>{overview?.data_source.note ?? "—"}</CardDescription></CardHeader>
           <CardContent>
             <dl>
+              <Row label="Dataset">{overview ? `v${overview.data_source.dataset.version} · ${overview.data_source.dataset.name}` : "—"}</Row>
               <Row label="Files">{overview?.data_source.files.join(", ") ?? "—"}</Row>
               <Row label="Loaded">{formatLoadedAt(overview?.data_source.loaded_at)}</Row>
               <Row label="Readings · sites · rules">{health ? `${health.readings_loaded} · ${health.sites_loaded} · ${health.thresholds_loaded}` : "—"}</Row>

@@ -183,3 +183,9 @@
     radial-gradient(120% 60% at 0% 0%, rgb(43 91 215 / 0.28), transparent 60%),
     linear-gradient(180deg, #0d2554 0%, #0a1d45 55%, #081738 100%);
 }
+
+/* Indeterminate progress bar (dataset validation). */
+@keyframes progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}

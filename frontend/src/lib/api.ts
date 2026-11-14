@@ -1,6 +1,7 @@
 import type {
-  ChatResponse, ChatStatus, ChatTurn, Exceedance, Health, Overview, OverviewQuery, Page, Reading, ReadingsQuery, SensorInfo,
-  SiteDetail, SiteSummary, Summary, Threshold,
+  ActivationResponse, AdminStatus, ChatResponse, ChatStatus, ChatTurn, CreateDatasetResponse, DatasetList, DatasetPreview,
+  DatasetVersion, Exceedance, Health, Overview, OverviewQuery, Page, Reading, ReadingsQuery, SensorInfo, SiteDetail,
+  SiteSummary, Summary, Threshold, ValidationReport,
 } from "./types";
 
 /**
@@ -48,10 +49,14 @@ function qs(params: Query = {}): string {
 async function request<T>(path: string, init: RequestInit = {}, signal?: AbortSignal): Promise<T> {
   let res: Response;
   try {
+    const json = init.body && !(init.body instanceof FormData);
     res = await fetch(`${API_BASE_URL}${path}`, {
       ...init,
       signal,
-      headers: { Accept: "application/json", ...(init.body ? { "Content-Type": "application/json" } : {}) },
+      // The admin session is an HttpOnly cookie. "include" also sends it to the API in local development
+      // (frontend on port 3100, API on 8001); on Vercel the API is same-origin.
+      credentials: "include",
+      headers: { Accept: "application/json", ...(json ? { "Content-Type": "application/json" } : {}), ...init.headers },
       cache: "no-store",
     });
   } catch (err) {
@@ -87,4 +92,45 @@ export const api = {
   chatStatus: (signal?: AbortSignal) => request<ChatStatus>("/api/chat/status", {}, signal),
   chat: (messages: ChatTurn[], signal?: AbortSignal) =>
     request<ChatResponse>("/api/chat", { method: "POST", body: JSON.stringify({ messages }) }, signal),
+
+  // ---------- datasets and admin access ----------
+  datasets: (signal?: AbortSignal) => request<DatasetList>("/api/datasets", {}, signal),
+  activeDataset: (signal?: AbortSignal) => request<DatasetVersion>("/api/datasets/active", {}, signal),
+  adminStatus: (signal?: AbortSignal) => request<AdminStatus>("/api/admin/session", {}, signal),
+  signIn: (token: string) =>
+    request<AdminStatus>("/api/admin/session", { method: "POST", body: JSON.stringify({ token }) }),
+  signOut: () => request<AdminStatus>("/api/admin/session", { method: "DELETE", headers: ADMIN_HEADER }),
+  previewDataset: (files: DatasetFiles, signal?: AbortSignal) =>
+    request<DatasetPreview>("/api/datasets/preview", { method: "POST", body: form(files), headers: ADMIN_HEADER }, signal),
+  createDataset: (files: DatasetFiles, name: string, activate = true) =>
+    request<CreateDatasetResponse>("/api/datasets", {
+      method: "POST", body: form(files, { name, activate: String(activate) }), headers: ADMIN_HEADER,
+    }),
+  activateDataset: (id: string) =>
+    request<ActivationResponse>(`/api/datasets/${encodeURIComponent(id)}/activate`, { method: "POST", headers: ADMIN_HEADER }),
+  datasetValidation: (id: string, signal?: AbortSignal) =>
+    request<ValidationReport>(`/api/datasets/${encodeURIComponent(id)}/validation`, {}, signal),
+};
+
+/** Sent with every admin write; the API rejects cookie-authenticated writes without it (CSRF protection). */
+const ADMIN_HEADER = { "X-SiteWatch-Admin": "1" };
+
+export interface DatasetFiles {
+  readings?: File | null;
+  thresholds?: File | null;
+}
+
+function form(files: DatasetFiles, fields: Record<string, string> = {}): FormData {
+  const data = new FormData();
+  if (files.readings) data.append("readings", files.readings, files.readings.name);
+  if (files.thresholds) data.append("thresholds", files.thresholds, files.thresholds.name);
+  for (const [k, v] of Object.entries(fields)) data.append(k, v);
+  return data;
+}
+
+/** Download links, served by the API from the active dataset version. */
+export const exportUrl = {
+  readings: (query: Query = {}) => `${API_BASE_URL}/api/exports/readings.csv${qs(query)}`,
+  exceedances: (query: Query = {}) => `${API_BASE_URL}/api/exports/exceedances.csv${qs(query)}`,
+  summaryPdf: (query: Query = {}) => `${API_BASE_URL}/api/reports/summary.pdf${qs(query)}`,
 };
