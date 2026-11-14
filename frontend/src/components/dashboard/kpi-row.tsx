@@ -68,18 +68,18 @@ export function KpiRow({ overview }: { overview: Overview }) {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {kpis.map(({ id, label, value, pill, pillIcon: PillIcon, caption, icon: Icon, tone, href }) => (
         <Link key={id} href={href} data-testid={`kpi-${id}`} title={`${label}: ${pill}, ${caption}`}
-          className={cn("group flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-card transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none", TONE[tone].card)}>
-          <span className={cn("flex size-14 shrink-0 items-center justify-center rounded-2xl", TONE[tone].tile)}>
-            <Icon className="size-7" strokeWidth={1.75} />
+          className={cn("group flex h-[5.75rem] items-center gap-3.5 rounded-2xl border bg-card px-4 shadow-card transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none", TONE[tone].card)}>
+          <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-xl", TONE[tone].tile)}>
+            <Icon className="size-6" strokeWidth={1.8} />
           </span>
           <span className="min-w-0 flex-1">
             <span className="flex items-start justify-between gap-2">
-              <span className="truncate text-[0.95rem] leading-snug font-semibold whitespace-nowrap">{label}</span>
+              <span className="truncate text-sm leading-snug font-semibold whitespace-nowrap">{label}</span>
               <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold whitespace-nowrap", TONE[tone].pill)}>
                 {PillIcon && <PillIcon className="size-3" strokeWidth={3} />}{pill}
               </span>
             </span>
-            <span className="block text-[1.85rem] leading-tight font-bold tracking-tight whitespace-nowrap tabular" data-testid={`kpi-${id}-value`}>{value}</span>
+            <span className="mt-0.5 block text-[1.6rem] leading-tight font-bold tracking-tight whitespace-nowrap tabular" data-testid={`kpi-${id}-value`}>{value}</span>
             <span className="sr-only">{caption}</span>
           </span>
         </Link>
