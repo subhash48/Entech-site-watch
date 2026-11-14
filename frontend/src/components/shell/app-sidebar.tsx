@@ -54,8 +54,8 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="relative z-10 px-3 pt-3 group-data-[collapsible=icon]:px-2">
-        <SidebarMenu className="gap-1.5">
+      <SidebarContent className="relative z-10 px-3 pt-2 group-data-[collapsible=icon]:px-2">
+        <SidebarMenu className="gap-1">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
@@ -65,7 +65,7 @@ export function AppSidebar() {
                   isActive={active}
                   tooltip={label}
                   className={cn(
-                    "h-11 gap-3.5 rounded-xl px-4 text-[0.95rem] font-medium text-sidebar-foreground [&_svg]:size-5!",
+                    "h-10 gap-3 rounded-xl px-3.5 text-[0.9rem] font-medium text-sidebar-foreground [&_svg]:size-[1.15rem]!",
                     "hover:bg-white/8 hover:text-white",
                     "data-[active=true]:bg-sidebar-primary! data-[active=true]:text-white! data-[active=true]:shadow-[0_6px_18px_-6px_rgb(43_91_215/0.8)]",
                   )}
@@ -79,7 +79,7 @@ export function AppSidebar() {
                   <SidebarMenuBadge
                     data-testid="nav-alert-count"
                     aria-label={`${alerts} exceedances`}
-                    className="top-1/2! right-3 size-6 -translate-y-1/2 rounded-full bg-[#e5484d] px-0 text-xs font-semibold text-white!"
+                    className="top-1/2! right-3 size-5 -translate-y-1/2 rounded-full bg-[#e5484d] px-0 text-[11px] font-semibold text-white!"
                   >
                     {alerts}
                   </SidebarMenuBadge>
