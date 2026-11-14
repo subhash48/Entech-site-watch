@@ -120,7 +120,11 @@ function Message({ message, onRetry }: { message: UIMessage; onRetry: () => void
   );
 }
 
-export function ChatPanel({ className, autoFocus }: { className?: string; autoFocus?: boolean }) {
+/**
+ * The SiteWatch AI chat. `compact` is the dashboard preview: a smaller header with a link to the full
+ * assistant page; the conversation itself is shared with the panel and the page (same ChatProvider).
+ */
+export function ChatPanel({ className, autoFocus, compact = false }: { className?: string; autoFocus?: boolean; compact?: boolean }) {
   const { messages, pending, status, statusError, send, retry, clear } = useChat();
   const [draft, setDraft] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
@@ -141,15 +145,22 @@ export function ChatPanel({ className, autoFocus }: { className?: string; autoFo
 
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
-      <div className="flex items-start gap-3 px-5 pt-5 pb-3">
-        <Sparkles className="mt-0.5 size-7 shrink-0 text-primary" strokeWidth={1.7} />
+      <div className={cn("flex items-start gap-3", compact ? "items-center gap-2.5 px-4 pt-3.5 pb-2" : "px-5 pt-5 pb-3")}>
+        <Sparkles className={cn("shrink-0 text-primary", compact ? "size-6" : "mt-0.5 size-7")} strokeWidth={1.7} />
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg leading-tight font-bold tracking-tight">Project AI Assistant</h2>
-          <p className="truncate text-sm text-muted-foreground">Ask questions about your SiteWatch project data.</p>
+          <h2 className={cn("leading-tight font-bold tracking-tight", compact ? "text-base" : "text-lg")}>Project AI Assistant</h2>
+          <p className={cn("truncate text-muted-foreground", compact ? "text-[0.8rem]" : "text-sm")}>Ask questions about your SiteWatch project data.</p>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+        <span className={cn("inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent font-semibold text-accent-foreground",
+          compact ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs")}>
           <Layers className="size-3.5" /> Agentic RAG
         </span>
+        {compact && (
+          <Link href="/assistant" className="hidden shrink-0 items-center gap-0.5 text-[0.8rem] font-semibold text-primary hover:underline sm:inline-flex"
+            data-testid="open-assistant">
+            Open <ChevronRight className="size-3.5" />
+          </Link>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <button type="button" aria-label="How the assistant works" className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground">

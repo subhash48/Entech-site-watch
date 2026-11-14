@@ -62,8 +62,8 @@ export function DashboardView() {
           <SitesCard sites={overview.sites} total={all?.totals.total_sites ?? overview.totals.total_sites} />
           <AlertsCard alerts={overview.recent_alerts} total={overview.totals.exceeded_readings} multiDay={multiDay} />
           <TrendsCard trends={overview.trends} />
-          <section className="flex h-[30rem] min-w-0 flex-col rounded-2xl border bg-card shadow-card xl:h-[25rem]" data-testid="assistant-card">
-            <ChatPanel className="h-full" />
+          <section className="flex h-[24rem] min-w-0 flex-col rounded-2xl border bg-card shadow-card xl:h-[19rem]" data-testid="assistant-card">
+            <ChatPanel className="h-full" compact />
           </section>
         </div>
       )}
