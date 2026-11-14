@@ -101,7 +101,7 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
   const total = series.reduce((n, s) => n + (mode === "alerts" ? s.exceeded : s.readings), 0);
 
   return (
-    <DashCard icon={TrendingUp} title="Alert Trends" testId="trends-card" className="h-[21rem] xl:h-[19rem]"
+    <DashCard icon={TrendingUp} title="Alert Trends" testId="trends-card" className="xl:h-[19rem]"
       subtitle={mode === "alerts" ? "Cumulative threshold exceedances by sensor type" : "Readings received by sensor type"}
       action={
         <div role="group" aria-label="Chart mode" className="flex shrink-0 rounded-lg border bg-muted p-0.5">
@@ -144,7 +144,7 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
               {size === DAY ? "Daily" : "Hourly"} buckets · times as recorded{size === HOUR && first ? ` on ${formatDate(first)}` : ""}
             </p>
           </div>
-          <ul className="grid shrink-0 grid-cols-3 gap-1.5 sm:w-36 sm:grid-cols-1 sm:content-center" data-testid="trend-legend">
+          <ul className="grid shrink-0 gap-1.5 sm:w-36 sm:content-center" data-testid="trend-legend">
             {series.map((s) => {
               const value = mode === "alerts" ? s.exceeded : s.readings;
               return (
@@ -161,7 +161,7 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
                 </li>
               );
             })}
-            <li className="col-span-3 px-1 text-[11px] text-muted-foreground tabular sm:col-span-1">{total} {mode === "alerts" ? "exceedances" : "readings"} in view</li>
+            <li className="px-1 text-[11px] text-muted-foreground tabular">{total} {mode === "alerts" ? "exceedances" : "readings"} in view</li>
           </ul>
         </div>
       )}

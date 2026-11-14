@@ -34,7 +34,7 @@ export function SitesCard({ sites, total }: { sites: SiteSummary[]; total: numbe
             <thead>
               <tr className="border-b text-left text-xs font-semibold text-muted-foreground">
                 <th className="px-1 pb-2 font-semibold">Site</th>
-                <th className="px-1 pb-2 font-semibold">Status</th>
+                <th className="px-1 pb-2 font-semibold"><span className="sr-only sm:not-sr-only">Status</span></th>
                 <th className="px-1 pb-2 text-center font-semibold">Alerts</th>
                 <th className="px-1 pb-2 text-center font-semibold" title="Readings with a value / readings received">Coverage</th>
                 <th className="pb-2"><span className="sr-only">Open</span></th>
