@@ -8,17 +8,17 @@ export function DashCard({ icon: Icon, title, subtitle, action, children, classN
 }) {
   return (
     <section data-testid={testId} className={cn("flex min-w-0 flex-col rounded-2xl border bg-card shadow-card", className)}>
-      <header className="flex flex-wrap items-start gap-3 px-5 pt-5 pb-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-          <Icon className="size-5" strokeWidth={1.9} />
+      <header className="flex flex-wrap items-center gap-2.5 px-4 pt-3.5 pb-2.5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+          <Icon className="size-4" strokeWidth={2} />
         </span>
-        <div className="min-w-[11rem] flex-1">
-          <h2 className="text-lg leading-tight font-bold tracking-tight">{title}</h2>
-          {subtitle && <p className="truncate text-sm text-muted-foreground">{subtitle}</p>}
+        <div className="min-w-[9rem] flex-1">
+          <h2 className="text-base leading-tight font-bold tracking-tight">{title}</h2>
+          {subtitle && <p className="truncate text-[0.8rem] text-muted-foreground">{subtitle}</p>}
         </div>
         {action}
       </header>
-      <div className={cn("min-h-0 flex-1 px-5 pb-5", bodyClassName)}>{children}</div>
+      <div className={cn("min-h-0 flex-1 px-4 pb-4", bodyClassName)}>{children}</div>
     </section>
   );
 }
