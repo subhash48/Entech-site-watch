@@ -58,6 +58,8 @@ Documentation retrieval uses simple local chunking by Markdown heading and BM25 
 
 ## Security notes
 
+- Datasets: `app/datasets/` validates uploads (`validation.py`), stores immutable versions in PostgreSQL or local SQLite (`store.py`, migrations in `backend/migrations/`), and resolves the active version for every request (`service.py`). The active pointer is read from the database on each request and classified versions are cached by immutable id, so serverless instances never serve a stale dataset. With no activated upload, the committed `backend/data` files (starter dataset, v0) are used.
+- Admin access for dataset management (`app/auth.py`): a server-side `ADMIN_TOKEN` exchanged for a signed HttpOnly session cookie; cookie writes also require the `X-SiteWatch-Admin` header. The assistant's tools receive a read-only catalog and have no path to dataset writes.
 - The AI provider key (`ANTHROPIC_API_KEY` or `GROQ_API_KEY`) lives only in the backend environment. The browser never sees it; the frontend calls `/api/chat` on the backend.
 - The assistant has no tools that write files, run commands or reach other systems.
 - CORS allows only the origins in `CORS_ORIGINS`, only GET and POST, and no credentials.

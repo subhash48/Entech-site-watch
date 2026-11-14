@@ -6,7 +6,7 @@ import { useChat } from "@/components/chat/chat-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TOOLS = ["get_sites", "get_site_details", "get_readings", "get_exceedances", "get_thresholds",
-  "get_monitoring_summary", "search_project_docs"];
+  "get_monitoring_summary", "get_dataset_info", "compare_dataset_versions", "search_project_docs"];
 
 export function AssistantView() {
   const { status } = useChat();

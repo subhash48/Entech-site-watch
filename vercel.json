@@ -13,7 +13,7 @@
       "functions": {
         "app/main.py": {
           "maxDuration": 300,
-          "includeFiles": "{data/**,project_docs/**}",
+          "includeFiles": "{data/**,project_docs/**,migrations/**}",
           "excludeFiles": "{tests/**,scripts/**,.pytest_cache/**,**/__pycache__/**,.env}"
         }
       }

@@ -148,7 +148,8 @@ test.describe("sensors, search and navigation", () => {
   test("every sidebar page opens with its title", async ({ page }) => {
     await page.goto("/");
     for (const [label, title] of [["Sites", "Construction Sites"], ["Alerts", "Threshold Exceedances"],
-      ["Sensors", "Sensor Readings"], ["Reports", "Client Reports"], ["AI Assistant", "AI Assistant"],
+      ["Sensors", "Sensor Readings"], ["Reports", "Client Reports"], ["Data Management", "Data Management"],
+      ["AI Assistant", "AI Assistant"],
       ["Settings", "Settings"], ["Dashboard", "Construction Site Monitoring"]]) {
       await page.getByRole("link", { name: label, exact: true }).click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
