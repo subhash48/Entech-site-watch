@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider
       open={open}
       onOpenChange={(value) => setOverride({ open: value, desktop: isDesktop })}
-      style={{ "--sidebar-width": "15.5rem" } as React.CSSProperties}
+      style={{ "--sidebar-width": "14rem" } as React.CSSProperties}
     >
       <AppSidebar />
       <SidebarInset className="min-w-0 bg-background">
