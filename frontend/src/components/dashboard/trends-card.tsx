@@ -104,10 +104,10 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
     <DashCard icon={TrendingUp} title="Alert Trends" testId="trends-card" className="h-[21rem] xl:h-[19rem]"
       subtitle={mode === "alerts" ? "Cumulative threshold exceedances by sensor type" : "Readings received by sensor type"}
       action={
-        <div role="group" aria-label="Chart mode" className="flex shrink-0 rounded-xl border bg-muted p-1">
+        <div role="group" aria-label="Chart mode" className="flex shrink-0 rounded-lg border bg-muted p-0.5">
           {(["alerts", "readings"] as const).map((m) => (
             <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)}
-              className={cn("rounded-lg px-3.5 py-1.5 text-sm font-semibold capitalize transition-colors",
+              className={cn("rounded-md px-3 py-1 text-[0.8rem] font-semibold capitalize transition-colors",
                 mode === m ? "bg-[#1e3a8a] text-white shadow-sm dark:bg-primary dark:text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
               {m}
             </button>
