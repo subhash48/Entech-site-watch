@@ -237,8 +237,8 @@ export function ChatPanel({ className, autoFocus, compact = false }: { className
         )}
       </div>
 
-      <form className="px-5 pt-3 pb-5" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-        <div className="flex items-end gap-3">
+      <form className={compact ? "px-4 pt-2 pb-4" : "px-5 pt-3 pb-5"} onSubmit={(e) => { e.preventDefault(); submit(); }}>
+        <div className={cn("flex items-end", compact ? "gap-2" : "gap-3")}>
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -254,11 +254,13 @@ export function ChatPanel({ className, autoFocus, compact = false }: { className
             disabled={!!notConfigured}
             placeholder={notConfigured ? "Configure an AI key to start chatting" : "Ask a question about your sites, sensors, or alerts…"}
             aria-label="Message SiteWatch AI"
-            className="max-h-28 min-h-12 flex-1 resize-none rounded-xl border bg-card px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25 disabled:opacity-60"
+            className={cn("flex-1 resize-none rounded-xl border bg-card text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25 disabled:opacity-60",
+              compact ? "max-h-20 min-h-10 px-3 py-2.5" : "max-h-28 min-h-12 px-4 py-3")}
           />
           <button type="submit" disabled={disabled || !draft.trim()} aria-label="Send message"
-            className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#3b82f6] text-white shadow-[0_6px_16px_-6px_rgb(59_130_246/0.8)] transition-colors hover:bg-[#2563eb] disabled:opacity-50 disabled:shadow-none">
-            <SendHorizontal className="size-5" />
+            className={cn("flex shrink-0 items-center justify-center rounded-xl bg-[#3b82f6] text-white shadow-[0_6px_16px_-6px_rgb(59_130_246/0.8)] transition-colors hover:bg-[#2563eb] disabled:opacity-50 disabled:shadow-none",
+              compact ? "size-10" : "size-12")}>
+            <SendHorizontal className={compact ? "size-[1.1rem]" : "size-5"} />
           </button>
         </div>
       </form>
