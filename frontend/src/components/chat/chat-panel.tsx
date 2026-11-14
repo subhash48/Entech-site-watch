@@ -29,8 +29,18 @@ const KEY_HELP: Record<string, [string, string]> = {
   groq: ["GROQ_API_KEY", "Groq"],
 };
 
-function SetupNotice({ message, provider }: { message: string; provider: string }) {
+function SetupNotice({ message, provider, compact }: { message: string; provider: string; compact?: boolean }) {
   const [keyVar, vendor] = KEY_HELP[provider] ?? KEY_HELP.anthropic;
+  if (compact) {
+    return (
+      <div data-testid="ai-setup" className="space-y-1.5 rounded-xl border border-missing-border bg-missing-soft/60 p-3 text-[0.8rem]">
+        <p className="flex items-center gap-2 font-semibold"><KeyRound className="size-4 text-missing" /> SiteWatch AI is not configured</p>
+        <p className="text-muted-foreground">{message}</p>
+        <p className="text-muted-foreground">Set <code className="font-mono text-[11px]">{keyVar}</code> to your {vendor} API key on the server.
+          {" "}<Link href="/assistant" className="font-medium text-primary hover:underline">Setup steps</Link></p>
+      </div>
+    );
+  }
   return (
     <div data-testid="ai-setup" className="space-y-2.5 rounded-xl border border-missing-border bg-missing-soft/60 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><KeyRound className="size-4 text-missing" /> SiteWatch AI is not configured</p>
@@ -186,19 +196,20 @@ export function ChatPanel({ className, autoFocus, compact = false }: { className
 
       <div ref={logRef} className={cn("min-h-0 flex-1 overflow-y-auto", compact ? "space-y-3 px-4 py-1" : "space-y-4 px-5 py-2")}
         data-testid="chat-log" aria-live="polite">
-        {notConfigured && <SetupNotice message={status.message} provider={status.provider} />}
+        {notConfigured && <SetupNotice message={status.message} provider={status.provider} compact={compact} />}
         {statusError && (
           <p role="alert" className="rounded-xl border border-exceeded-border bg-exceeded-soft/60 p-3 text-sm">{statusError}</p>
         )}
         {messages.length === 0 && !notConfigured && !statusError && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
+            <p className={cn("text-muted-foreground", compact ? "text-[0.8rem]" : "text-sm")}>
               Grounded in this project&apos;s data and documentation. Try one of these:
             </p>
-            <div className="flex flex-wrap gap-2">
-              {SUGGESTED_PROMPTS.map((p) => (
+            <div className={cn("flex flex-wrap", compact ? "gap-1.5" : "gap-2")}>
+              {(compact ? SUGGESTED_PROMPTS.slice(0, 4) : SUGGESTED_PROMPTS).map((p) => (
                 <button key={p} type="button" disabled={disabled} onClick={() => submit(p)}
-                  className="rounded-full border bg-card px-3 py-1.5 text-left text-xs font-medium transition-colors hover:border-primary/40 hover:bg-accent disabled:opacity-50">
+                  className={cn("rounded-full border bg-card text-left font-medium transition-colors hover:border-primary/40 hover:bg-accent disabled:opacity-50",
+                    compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs")}>
                   {p}
                 </button>
               ))}
