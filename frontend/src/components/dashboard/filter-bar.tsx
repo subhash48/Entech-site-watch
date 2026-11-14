@@ -43,25 +43,27 @@ export function FilterBar({ options, value, onChange }: {
   const active = Object.values(value).some(Boolean);
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center" data-testid="dashboard-filters">
-      <span className="text-sm font-semibold lg:mr-1">Filters:</span>
-      <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:flex lg:items-center">
-        <FilterSelect icon={MapPin} label="Site" value={value.site_id} onChange={(v) => set({ site_id: v })}
-          allLabel="All Sites" testId="filter-site" className="lg:w-[15.5rem]"
-          options={(options?.sites ?? []).map((s) => ({ value: s.site_id, label: s.site_name }))} />
-        <FilterSelect icon={Radio} label="Sensor type" value={value.sensor} onChange={(v) => set({ sensor: v })}
-          allLabel="All Sensor Types" testId="filter-sensor" className="lg:w-[15.5rem]"
-          options={(options?.sensor_breakdown ?? []).map((s) => ({ value: s.sensor, label: s.label }))} />
-        <FilterSelect icon={Layers} label="Status" value={value.status} onChange={(v) => set({ status: v as DashboardFilters["status"] })}
-          allLabel="All Statuses" testId="filter-status" className="lg:w-[15.5rem]"
-          options={[{ value: "EXCEEDED", label: "Exceeded" }, { value: "NORMAL", label: "Normal" }, { value: "MISSING_DATA", label: "Missing data" }]} />
+      <div className="flex items-center gap-2 lg:w-[4.5rem] lg:flex-col lg:items-start lg:gap-0">
+        <span className="text-sm font-semibold">Filters:</span>
         {active && (
           <button type="button" onClick={() => onChange(EMPTY_FILTERS)}
-            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl px-3 text-sm font-medium text-primary hover:bg-accent">
-            <RotateCcw className="size-4" /> Reset
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+            <RotateCcw className="size-3" /> Reset
           </button>
         )}
+      </div>
+      <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <FilterSelect icon={MapPin} label="Site" value={value.site_id} onChange={(v) => set({ site_id: v })}
+          allLabel="All Sites" testId="filter-site"
+          options={(options?.sites ?? []).map((s) => ({ value: s.site_id, label: s.site_name }))} />
+        <FilterSelect icon={Radio} label="Sensor type" value={value.sensor} onChange={(v) => set({ sensor: v })}
+          allLabel="All Sensor Types" testId="filter-sensor"
+          options={(options?.sensor_breakdown ?? []).map((s) => ({ value: s.sensor, label: s.label }))} />
+        <FilterSelect icon={Layers} label="Status" value={value.status} onChange={(v) => set({ status: v as DashboardFilters["status"] })}
+          allLabel="All Statuses" testId="filter-status"
+          options={[{ value: "EXCEEDED", label: "Exceeded" }, { value: "NORMAL", label: "Normal" }, { value: "MISSING_DATA", label: "Missing data" }]} />
         <FilterSelect icon={CalendarDays} label="Date" value={value.date} onChange={(v) => set({ date: v })}
-          allLabel="All Dates" testId="filter-date" className="lg:ml-auto lg:w-[11.5rem]"
+          allLabel="All Dates" testId="filter-date"
           options={(options?.available_dates ?? []).map((d) => ({ value: d, label: formatDate(`${d}T00:00`) }))} />
       </div>
     </div>
