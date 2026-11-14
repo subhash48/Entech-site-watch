@@ -144,24 +144,24 @@ export function TrendsCard({ trends }: { trends: SensorTrend[] }) {
               {size === DAY ? "Daily" : "Hourly"} buckets · times as recorded{size === HOUR && first ? ` on ${formatDate(first)}` : ""}
             </p>
           </div>
-          <ul className="grid shrink-0 gap-2.5 sm:w-44 sm:content-center" data-testid="trend-legend">
+          <ul className="grid shrink-0 grid-cols-3 gap-1.5 sm:w-36 sm:grid-cols-1 sm:content-center" data-testid="trend-legend">
             {series.map((s) => {
               const value = mode === "alerts" ? s.exceeded : s.readings;
               return (
-                <li key={s.key} className="flex items-start justify-between gap-2 rounded-xl bg-muted/70 px-3 py-2.5">
-                  <span className="flex items-center gap-2 text-sm font-medium">
-                    <span className="size-2.5 rounded-full" style={{ background: s.color }} />{s.name}
+                <li key={s.key} className="flex items-start justify-between gap-2 rounded-lg bg-muted/60 px-2.5 py-1.5">
+                  <span className="flex items-center gap-1.5 text-[0.8rem] font-medium">
+                    <span className="size-2 rounded-full" style={{ background: s.color }} />{s.name}
                   </span>
                   <span className="text-right">
-                    <span className="block text-base leading-tight font-bold tabular">{value}</span>
-                    <span className="block text-[11px] whitespace-nowrap text-muted-foreground tabular">
+                    <span className="block text-sm leading-tight font-bold tabular">{value}</span>
+                    <span className="block text-[10px] whitespace-nowrap text-muted-foreground tabular">
                       {mode === "alerts" ? `of ${s.readings} readings` : `${s.exceeded} exceeded`}
                     </span>
                   </span>
                 </li>
               );
             })}
-            <li className="px-1 text-xs text-muted-foreground tabular">{total} {mode === "alerts" ? "exceedances" : "readings"} in view</li>
+            <li className="col-span-3 px-1 text-[11px] text-muted-foreground tabular sm:col-span-1">{total} {mode === "alerts" ? "exceedances" : "readings"} in view</li>
           </ul>
         </div>
       )}
