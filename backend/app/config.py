@@ -6,6 +6,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent      # backend/
 REPO_DIR = BASE_DIR.parent                              # repository root
 DEFAULT_ORIGINS = "http://localhost:3100,http://127.0.0.1:3100"  # frontend dev server (npm run dev)
+# Model used when AI_MODEL is not set, per AI_PROVIDER.
+DEFAULT_MODELS = {"anthropic": "claude-opus-5-5", "groq": "openai/gpt-oss-120b"}
 
 
 def load_env_file(path: Path = BASE_DIR / ".env") -> None:
@@ -59,10 +61,12 @@ class Settings:
     ai_timeout_seconds: int = 45
     ai_max_iterations: int = 5
     anthropic_api_key: str | None = field(default=None, repr=False)
+    groq_api_key: str | None = field(default=None, repr=False)
 
     @property
     def ai_configured(self) -> bool:
-        return self.ai_provider == "anthropic" and bool(self.anthropic_api_key)
+        keys = {"anthropic": self.anthropic_api_key, "groq": self.groq_api_key}
+        return bool(keys.get(self.ai_provider))
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -70,6 +74,10 @@ class Settings:
         data_dir = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
         docs = os.getenv("DOCS_PATHS")
         effort = os.getenv("AI_EFFORT", "medium")
+        provider = os.getenv("AI_PROVIDER", "anthropic").strip().lower()
+        default_model = DEFAULT_MODELS.get(provider, DEFAULT_MODELS["anthropic"])
+        if provider == "groq":
+            default_model = os.getenv("GROQ_MODEL") or default_model
         return cls(
             readings_path=Path(os.getenv("READINGS_PATH", data_dir / "readings.csv")),
             thresholds_path=Path(os.getenv("THRESHOLDS_PATH", data_dir / "thresholds.json")),
@@ -79,10 +87,11 @@ class Settings:
             # VERCEL_ENV (production | preview | development) is set automatically on Vercel.
             environment=os.getenv("ENVIRONMENT") or os.getenv("VERCEL_ENV") or "development",
             docs_paths=[Path(p) for p in _split(docs)] if docs else default_docs_paths(),
-            ai_provider=os.getenv("AI_PROVIDER", "anthropic").strip().lower(),
-            ai_model=os.getenv("AI_MODEL", "claude-opus-5-5").strip(),
+            ai_provider=provider,
+            ai_model=(os.getenv("AI_MODEL") or default_model).strip(),
             ai_effort=effort if effort in {"low", "medium", "high", "xhigh", "max"} else "medium",
             ai_timeout_seconds=_int("AI_TIMEOUT_SECONDS", 45, 5, 120),
             ai_max_iterations=_int("AI_MAX_TOOL_ITERATIONS", 5, 1, 8),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,
+            groq_api_key=os.getenv("GROQ_API_KEY") or None,
         )

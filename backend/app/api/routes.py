@@ -41,18 +41,18 @@ StartQ = Annotated[datetime | None, Query(description="Only readings at or after
 EndQ = Annotated[datetime | None, Query(description="Only readings at or before this ISO 8601 time")]
 OrderQ = Annotated[queries.SortOrder, Query(description="asc or desc")]
 
-NOT_CONFIGURED = ("SiteWatch AI is not configured. Set ANTHROPIC_API_KEY in the backend environment "
-                  "(see backend/.env.example) and restart the API.")
-SUPPORTED_PROVIDERS = ("anthropic",)
+KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "groq": "GROQ_API_KEY"}
+SUPPORTED_PROVIDERS = tuple(KEY_VARS)
 
 
 def not_configured_message(settings: Settings) -> str:
     """Explain exactly why the assistant is unavailable, without revealing any secret values."""
     if settings.ai_provider not in SUPPORTED_PROVIDERS:
         return (f"AI_PROVIDER '{settings.ai_provider}' is not supported in this version (supported: "
-                f"{', '.join(SUPPORTED_PROVIDERS)}). Set AI_PROVIDER=anthropic and ANTHROPIC_API_KEY in "
-                "backend/.env, then restart the API.")
-    return NOT_CONFIGURED
+                f"{', '.join(SUPPORTED_PROVIDERS)}). Set AI_PROVIDER and the matching API key in the "
+                "backend environment, then restart the API.")
+    return (f"SiteWatch AI is not configured. Set {KEY_VARS[settings.ai_provider]} in the backend environment "
+            "(see backend/.env.example) and restart the API.")
 
 
 @router.get("/health", response_model=Health, tags=["system"])

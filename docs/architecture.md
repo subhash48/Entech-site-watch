@@ -49,7 +49,7 @@ Interactive API documentation is served by FastAPI at `/docs`.
 SiteWatch AI answers questions about this project only. It is a bounded tool-calling loop:
 
 1. A deterministic scope check rejects first messages that have nothing to do with SiteWatch, without calling the model.
-2. The model (Claude, through the Anthropic API) receives a fixed system prompt and a list of seven read-only tools: `get_sites`, `get_site_details`, `get_readings`, `get_exceedances`, `get_thresholds`, `get_monitoring_summary` and `search_project_docs`.
+2. The model (Claude through the Anthropic API, or a Groq-hosted model through Groq's OpenAI-compatible API, chosen by `AI_PROVIDER`) receives a fixed system prompt and a list of seven read-only tools: `get_sites`, `get_site_details`, `get_readings`, `get_exceedances`, `get_thresholds`, `get_monitoring_summary` and `search_project_docs`.
 3. Each tool call is checked against the allowlist, its arguments are validated with a strict Pydantic model, and it runs the same query functions as the API. Unknown tools and invalid arguments return an error to the model instead of running.
 4. The loop stops after at most 5 model steps (configurable with `AI_MAX_TOOL_ITERATIONS`), at most 6 tool calls per step, and a time limit. Tool outputs are capped at 12,000 characters and answers at 6,000.
 5. The response lists the data files and documentation sections the tools used as sources.
@@ -58,7 +58,7 @@ Documentation retrieval uses simple local chunking by Markdown heading and BM25 
 
 ## Security notes
 
-- The AI provider key (`ANTHROPIC_API_KEY`) lives only in the backend environment. The browser never sees it; the frontend calls `/api/chat` on the backend.
+- The AI provider key (`ANTHROPIC_API_KEY` or `GROQ_API_KEY`) lives only in the backend environment. The browser never sees it; the frontend calls `/api/chat` on the backend.
 - The assistant has no tools that write files, run commands or reach other systems.
 - CORS allows only the origins in `CORS_ORIGINS`, only GET and POST, and no credentials.
 - If no key is configured, `/api/chat` returns HTTP 503 with code `AI_NOT_CONFIGURED` and a setup message. It never returns a made-up answer.

@@ -4,7 +4,7 @@ Construction-site monitoring dashboard for EnTech's New York City sites. Enginee
 
 - **Backend:** Python, FastAPI and Pydantic. It reads `readings.csv` and `thresholds.json`, validates every row, and classifies each reading as `NORMAL`, `EXCEEDED` or `MISSING_DATA`.
 - **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui, Lucide icons and Recharts, with light and dark mode.
-- **AI:** Claude through the Anthropic API, using read-only tools over the same validated data as the dashboard, plus local documentation retrieval.
+- **AI:** Claude (Anthropic API) or a Groq-hosted model such as `openai/gpt-oss-120b`, selected with `AI_PROVIDER`, using read-only tools over the same validated data as the dashboard, plus local documentation retrieval.
 
 The data comes from static files. It is not a live or real-time feed.
 
@@ -72,7 +72,7 @@ The root [vercel.json](vercel.json) uses [Vercel Services](https://vercel.com/do
 Vercel passes the original path to the service, so the backend's routes are unchanged. The frontend calls `/api/...` on its own origin, so no CORS setup is needed.
 
 1. Import the GitHub repository in Vercel. Leave the Root Directory as the repository root; Vercel detects both services from `vercel.json`.
-2. In **Project Settings > Environment Variables**, add `ANTHROPIC_API_KEY` (server-side only). The optional `AI_*` settings are listed in [.env.example](.env.example). Do **not** set `NEXT_PUBLIC_API_BASE_URL`: leaving it unset makes the browser call the API on the same origin.
+2. In **Project Settings > Environment Variables**, add `AI_PROVIDER` and the matching key: `groq` + `GROQ_API_KEY`, or `anthropic` + `ANTHROPIC_API_KEY` (server-side only). The optional `AI_*` settings are listed in [.env.example](.env.example). Do **not** set `NEXT_PUBLIC_API_BASE_URL`: leaving it unset makes the browser call the API on the same origin.
 3. Deploy, then check `https://<your-app>.vercel.app/health` and `/docs`.
 
 How the details are handled:
@@ -130,9 +130,9 @@ Go to http://localhost:3100.
 
 The dashboard works fully without an AI key. To enable SiteWatch AI:
 
-1. Create an API key in the Anthropic Console (https://platform.claude.com/, API keys).
+1. Create an API key in the Anthropic Console (https://platform.claude.com/, API keys), or a Groq key (https://console.groq.com/keys).
 2. Copy `backend\.env.example` to `backend\.env`.
-3. Set `ANTHROPIC_API_KEY=` to your key in `backend\.env`. Do not paste it anywhere else; `.env` is git-ignored.
+3. Set `ANTHROPIC_API_KEY=` to your key in `backend\.env` (for Groq: `AI_PROVIDER=groq` and `GROQ_API_KEY=`). Do not paste it anywhere else; `.env` is git-ignored.
 4. Restart the backend, then open http://localhost:3100/assistant and try a suggested prompt such as "Which sites exceeded their limits?".
 
 Without a key, the assistant shows these setup steps and `POST /api/chat` returns HTTP 503 with code `AI_NOT_CONFIGURED`. It never returns a made-up answer.
@@ -208,7 +208,8 @@ Every error has the same shape: `{"error": {"code": "SITE_NOT_FOUND", "message":
   - Each turn is limited to 5 model steps, 6 tool calls per step, 12,000 characters per tool output, a time limit and a 6,000-character answer.
   - Instruction-like lines in retrieved documents are removed, and the model is told to ignore instructions inside tool results.
   - There are no tools that write files, run commands or reach other systems.
-- **Configuration (`backend/.env`):** `ANTHROPIC_API_KEY`, `AI_MODEL` (default `claude-opus-5-5`), `AI_EFFORT`, `AI_TIMEOUT_SECONDS`, `AI_MAX_TOOL_ITERATIONS`. The provider sits behind a small interface (`app/ai/provider.py`); this version implements Anthropic.
+- **Configuration (`backend/.env`):** `AI_PROVIDER` (`anthropic` or `groq`), `ANTHROPIC_API_KEY` or `GROQ_API_KEY`, `AI_MODEL` (default `claude-opus-5-5`, or `openai/gpt-oss-120b` for Groq), `AI_EFFORT`, `AI_TIMEOUT_SECONDS`, `AI_MAX_TOOL_ITERATIONS`. Providers sit behind a small interface (`app/ai/provider.py`).
+- **Groq rate limits:** Groq's free tier allows about 8,000 tokens per minute for `openai/gpt-oss-120b`, roughly one or two multi-step questions a minute. The backend waits and retries once for short limits and otherwise answers with HTTP 429 and the suggested wait time.
 
 ## Troubleshooting
 

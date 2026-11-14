@@ -67,11 +67,11 @@ def test_not_configured_returns_setup_message():
 
 def test_unsupported_provider_is_explained():
     settings = settings_for(DATA_DIR / "readings.csv", DATA_DIR / "thresholds.json")
-    settings = settings.__class__(**{**settings.__dict__, "ai_provider": "groq", "anthropic_api_key": None})
+    settings = settings.__class__(**{**settings.__dict__, "ai_provider": "mistral", "anthropic_api_key": None})
     c = TestClient(create_app(settings))
     status = c.get("/api/chat/status").json()
     assert status["configured"] is False
-    assert "AI_PROVIDER 'groq' is not supported" in status["message"]
+    assert "AI_PROVIDER 'mistral' is not supported" in status["message"]
     res = ask(c, "Which sites exceeded their limits?")
     assert res.status_code == 503 and "not supported" in res.json()["error"]["message"]
 

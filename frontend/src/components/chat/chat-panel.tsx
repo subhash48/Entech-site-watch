@@ -24,14 +24,20 @@ export const SUGGESTED_PROMPTS = [
 /** Where each cited data file can be inspected in the app. */
 const SOURCE_LINKS: Record<string, string> = { "readings.csv": "/sensors", "thresholds.json": "/settings" };
 
-function SetupNotice({ message }: { message: string }) {
+const KEY_HELP: Record<string, [string, string]> = {
+  anthropic: ["ANTHROPIC_API_KEY", "Anthropic"],
+  groq: ["GROQ_API_KEY", "Groq"],
+};
+
+function SetupNotice({ message, provider }: { message: string; provider: string }) {
+  const [keyVar, vendor] = KEY_HELP[provider] ?? KEY_HELP.anthropic;
   return (
     <div data-testid="ai-setup" className="space-y-2.5 rounded-xl border border-missing-border bg-missing-soft/60 p-4 text-sm">
       <p className="flex items-center gap-2 font-semibold"><KeyRound className="size-4 text-missing" /> SiteWatch AI is not configured</p>
       <p className="text-muted-foreground">{message}</p>
       <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
         <li>Copy <code className="font-mono text-xs">backend/.env.example</code> to <code className="font-mono text-xs">backend/.env</code>.</li>
-        <li>Set <code className="font-mono text-xs">ANTHROPIC_API_KEY</code> to your Anthropic API key.</li>
+        <li>Set <code className="font-mono text-xs">{keyVar}</code> to your {vendor} API key.</li>
         <li>Restart the backend, then reload this page.</li>
       </ol>
       <p className="text-xs text-muted-foreground">The key stays on the server and is never sent to the browser. The rest of the dashboard works without it.</p>
@@ -163,7 +169,7 @@ export function ChatPanel({ className, autoFocus }: { className?: string; autoFo
       </div>
 
       <div ref={logRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-2" data-testid="chat-log" aria-live="polite">
-        {notConfigured && <SetupNotice message={status.message} />}
+        {notConfigured && <SetupNotice message={status.message} provider={status.provider} />}
         {statusError && (
           <p role="alert" className="rounded-xl border border-exceeded-border bg-exceeded-soft/60 p-3 text-sm">{statusError}</p>
         )}

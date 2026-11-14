@@ -42,8 +42,9 @@ class ReadingsArgs(_Args):
     status: Literal["NORMAL", "EXCEEDED", "MISSING_DATA"] | None = None
     start: datetime | None = Field(None, description="ISO 8601 start time, inclusive")
     end: datetime | None = Field(None, description="ISO 8601 end time, inclusive")
-    sort: Literal["timestamp", "value", "site", "sensor"] = "timestamp"
-    order: Literal["asc", "desc"] = "asc"
+    sort: Literal["timestamp", "value", "site", "sensor"] = Field(
+        "timestamp", description="Sort field (default timestamp). For the highest or lowest values use sort=value.")
+    order: Literal["asc", "desc"] = Field("asc", description="asc or desc; sort=value with desc gives the highest first")
     page: int = Field(1, ge=1, le=100)
     page_size: int = Field(50, ge=1, le=50)
 
@@ -97,8 +98,9 @@ def _site_details(ctx, a: SiteDetailsArgs):
 
 def _readings(ctx, a: ReadingsArgs):
     page = query_readings(ctx.dataset, **a.model_dump())
+    # State the ordering explicitly so "latest" is never mistaken for "highest".
     return {"total": page.total, "page": page.page, "total_pages": page.total_pages,
-            "items": [_compact(r) for r in page.items]}, [READINGS, THRESHOLDS]
+            "sorted_by": f"{a.sort} {a.order}", "items": [_compact(r) for r in page.items]}, [READINGS, THRESHOLDS]
 
 
 def _exceedances(ctx, a: ExceedancesArgs):
@@ -136,7 +138,8 @@ TOOLS: dict[str, Tool] = {
     "get_site_details": Tool("One site's details: readings grouped by sensor with timestamps, units, configured "
                              "limits, exceedance amounts and missing data.", SiteDetailsArgs, _site_details),
     "get_readings": Tool("Sensor readings with optional filters (site, sensor id or type, status, time range), "
-                         "sorting and pagination (max 50 per page).", ReadingsArgs, _readings),
+                         "sorting and pagination (max 50 per page). For the highest or lowest values set sort=value.",
+                         ReadingsArgs, _readings),
     "get_exceedances": Tool("Confirmed threshold exceedances only (value > limit) with measured value, limit, excess "
                             "and percent over. Missing data is never included.", ExceedancesArgs, _exceedances),
     "get_thresholds": Tool("Configured threshold rules (limit and unit per sensor) from thresholds.json.",

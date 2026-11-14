@@ -23,7 +23,7 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 60_000,
       // No AI key: the assistant must show its setup message rather than answer.
-      env: { CORS_ORIGINS: `http://localhost:${WEB_PORT},http://127.0.0.1:${WEB_PORT}`, ANTHROPIC_API_KEY: "" },
+      env: { CORS_ORIGINS: `http://localhost:${WEB_PORT},http://127.0.0.1:${WEB_PORT}`, AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "", GROQ_API_KEY: "" },
     },
     {
       command: `npm run build && npx next start --port ${WEB_PORT}`,
