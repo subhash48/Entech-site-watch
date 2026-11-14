@@ -62,6 +62,10 @@ class Settings:
     ai_max_iterations: int = 5
     anthropic_api_key: str | None = field(default=None, repr=False)
     groq_api_key: str | None = field(default=None, repr=False)
+    # Dataset storage: PostgreSQL via DATABASE_URL; SQLite only for local development (never on Vercel).
+    database_url: str | None = field(default=None, repr=False)
+    sqlite_path: Path = BASE_DIR / ".local" / "sitewatch.sqlite3"
+    on_vercel: bool = False
 
     @property
     def ai_configured(self) -> bool:
@@ -94,4 +98,7 @@ class Settings:
             ai_max_iterations=_int("AI_MAX_TOOL_ITERATIONS", 5, 1, 8),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,
             groq_api_key=os.getenv("GROQ_API_KEY") or None,
+            database_url=os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or None,
+            sqlite_path=Path(os.getenv("SQLITE_PATH") or BASE_DIR / ".local" / "sitewatch.sqlite3"),
+            on_vercel=bool(os.getenv("VERCEL")),
         )

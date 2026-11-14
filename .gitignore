@@ -30,3 +30,6 @@ Thumbs.db
 
 # Vercel build output: docs copied into the backend bundle by backend/scripts/bundle_docs.py
 backend/project_docs/
+
+# Local development dataset storage (SQLite); production uses PostgreSQL
+backend/.local/
