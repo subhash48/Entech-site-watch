@@ -8,14 +8,17 @@ Construction-site monitoring dashboard for EnTech's New York City sites. Enginee
 
 The data comes from static files: the committed starter dataset or an uploaded, versioned dataset. It is not a live or real-time feed.
 
+![Operations Dashboard at 1440×900 (dark)](design/screenshots/dashboard-1440-dark.png)
+
+More screenshots: [1440×900 light](design/screenshots/dashboard-1440-light.png), [1920×1080 dark](design/screenshots/dashboard-1920-dark.png). Launch video: [brag-output/brag.mp4](brag-output/brag.mp4) (21 s, built from real captures of the app).
+
 ## Features
 
-- **Dashboard** (built from [design/sitewatch-reference.png](design/sitewatch-reference.png)):
-  - KPI cards: Total Sites, Active Alerts, Data Coverage and Missing Data.
-  - A filter row for site, sensor type, status and date. Every count and card follows it.
-  - A Sites table and a Sensor Alerts list.
-  - An Alert Trends chart with Alerts and Readings views.
-  - The embedded Project AI Assistant.
+- **Dashboard** (compact layout from [design/sitewatch-compact-dashboard.png](design/sitewatch-compact-dashboard.png)): the whole Operations Dashboard fits one 1440×900 or 1920×1080 screen at 100% zoom, with no horizontal scrolling.
+  - KPI cards (92px): Total Sites, Active Alerts, Data Coverage and Missing Data.
+  - Four equal filters (site, sensor type, status, date). Every count and card follows them.
+  - A balanced two-column grid: Sites (compact rows, no sideways scrolling) | Sensor Alerts, then Alert Trends | a compact Project AI Assistant preview that shows the latest exchange and links to the full assistant.
+  - Tablets stack the cards; phones get a single column with no page-wide overflow. Playwright checks the fit at 1440×900 and 1920×1080.
 - **Sites:** status, alert counts and data coverage per site. Each site's page groups its readings by sensor, with timestamps, units, configured limits and exceedance amounts.
 - **Alerts:** confirmed exceedances only, with measured value, limit, excess and percentage over. Missing data is kept separate.
 - **Sensors:** all readings, searchable and paginated, filterable by site, sensor, status and time range, with sortable timestamp and value columns. Missing values show as "Missing", never zero. The old `/readings` URL redirects here.

@@ -1,0 +1,8 @@
+site_id,site_name,sensor,timestamp,value
+S1,125 Broad St,noise_dba,2026-11-09T08:00:00,92
+S1,125 Broad St,vibration_ppv,2026-11-09T08:00:00,0.31
+S1,125 Broad St,dust_pm10,2026-11-09T08:00:00,140
+S2,40 Atlantic Ave,dust_pm10,2026-11-09T09:00:00,171
+S4,Pier 17,dust_pm10,2026-11-09T09:00:00,
+S4,Pier 17,noise_dba,2026-11-09T10:00:00,88
+S4,Pier 17,vibration_ppv,2026-11-09T11:00:00,0.58

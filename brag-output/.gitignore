@@ -1,0 +1,8 @@
+# Regenerable intermediates (see README.md "Rebuild")
+work/frames/
+work/stills/
+work/verify/
+work/*.wav
+work/waveform.png
+work/db.sqlite3*
+work/*.log

@@ -1,0 +1,1 @@
+125 Broad St hit 88 dBA. The limit was 85. SiteWatch AI puts every construction site, sensor limit and exceedance on one screen, checks every uploaded row (yes, it rejects "loud" as a noise reading), and its AI assistant answers from your data with the source file cited. Open source: github.com/subhash48/Entech-site-watch
