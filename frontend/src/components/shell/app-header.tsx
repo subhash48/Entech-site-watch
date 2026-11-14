@@ -167,13 +167,13 @@ export function AppHeader() {
   const pathname = usePathname();
   const meta = metaFor(pathname);
   return (
-    <header className="flex flex-col gap-4 px-4 pt-5 sm:px-6 lg:flex-row lg:items-start lg:justify-between lg:gap-6 lg:px-8 lg:pt-6">
+    <header className="flex flex-col gap-3 px-4 pt-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-7 lg:pt-5">
       <div className="flex min-w-0 items-start gap-2">
         <SidebarTrigger className="mt-0.5 -ml-1 size-9 lg:hidden" />
         <div className="min-w-0">
-          {meta.eyebrow && <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">{meta.eyebrow}</p>}
-          <h1 className="text-[1.6rem] leading-tight font-bold tracking-tight sm:text-[1.85rem]">{meta.title}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground sm:text-[0.95rem]">{meta.subtitle}</p>
+          {meta.eyebrow && <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">{meta.eyebrow}</p>}
+          <h1 className="text-[1.4rem] leading-tight font-bold tracking-tight sm:text-[1.55rem]">{meta.title}</h1>
+          <p className="mt-0.5 text-[0.85rem] text-muted-foreground sm:text-sm">{meta.subtitle}</p>
         </div>
       </div>
       <div className={cn("flex items-center gap-2 sm:gap-3")}>
