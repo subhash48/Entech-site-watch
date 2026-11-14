@@ -19,8 +19,17 @@ export function SitesCard({ sites, total }: { sites: SiteSummary[]; total: numbe
       {sites.length === 0 ? (
         <EmptyState title="No sites match these filters" />
       ) : (
-        <div className="relative -mx-1 overflow-x-auto">
-          <table className="w-full min-w-[34rem] text-sm" data-testid="sites-table">
+        <div className="relative -mx-1 overflow-x-auto sm:overflow-x-visible">
+          {/* Fixed layout: the Site column takes the remaining width and truncates, so the table never
+              scrolls sideways at desktop widths (a narrow phone may still scroll inside the card). */}
+          <table className="w-full min-w-[30rem] table-fixed text-sm sm:min-w-0" data-testid="sites-table">
+            <colgroup>
+              <col />
+              <col className="w-[7.75rem]" />
+              <col className="w-[4.5rem]" />
+              <col className="w-[5.25rem]" />
+              <col className="w-6" />
+            </colgroup>
             <thead>
               <tr className="border-b text-left text-[0.8rem] font-semibold">
                 <th className="px-1 pb-2.5 font-semibold">Site</th>
