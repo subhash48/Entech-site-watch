@@ -33,9 +33,9 @@ const META: [string, Meta][] = [
   ["/settings", { eyebrow: "Settings", title: "Settings", subtitle: "Appearance, API connection, data source and configured thresholds." }],
 ];
 const DASHBOARD: Meta = {
-  eyebrow: "Operations Dashboard",
-  title: "Construction Site Monitoring",
-  subtitle: "Sensor readings, threshold alerts, and AI-powered analysis across your construction sites.",
+  eyebrow: "",
+  title: "Operations Dashboard",
+  subtitle: "Construction site sensor monitoring, alerts, and AI-powered insights.",
 };
 
 function metaFor(pathname: string): Meta {
@@ -171,7 +171,7 @@ export function AppHeader() {
       <div className="flex min-w-0 items-start gap-2">
         <SidebarTrigger className="mt-0.5 -ml-1 size-9 lg:hidden" />
         <div className="min-w-0">
-          <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">{meta.eyebrow}</p>
+          {meta.eyebrow && <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">{meta.eyebrow}</p>}
           <h1 className="text-[1.6rem] leading-tight font-bold tracking-tight sm:text-[1.85rem]">{meta.title}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground sm:text-[0.95rem]">{meta.subtitle}</p>
         </div>

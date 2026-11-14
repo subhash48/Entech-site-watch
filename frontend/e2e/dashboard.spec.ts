@@ -15,7 +15,7 @@ test.describe("dashboard matches the CSV-derived data", () => {
       normal_readings: 9, missing_data_readings: 1, total_readings: 15 });
 
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Construction Site Monitoring" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Operations Dashboard" })).toBeVisible();
     await expect(page.getByTestId("kpi-sites-value")).toHaveText("3");
     await expect(page.getByTestId("kpi-alerts-value")).toHaveText("5");
     await expect(page.getByTestId("kpi-coverage-value")).toHaveText("14 / 15");
@@ -150,7 +150,7 @@ test.describe("sensors, search and navigation", () => {
     for (const [label, title] of [["Sites", "Construction Sites"], ["Alerts", "Threshold Exceedances"],
       ["Sensors", "Sensor Readings"], ["Reports", "Client Reports"], ["Data Management", "Data Management"],
       ["AI Assistant", "AI Assistant"],
-      ["Settings", "Settings"], ["Dashboard", "Construction Site Monitoring"]]) {
+      ["Settings", "Settings"], ["Dashboard", "Operations Dashboard"]]) {
       await page.getByRole("link", { name: label, exact: true }).click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
     }
