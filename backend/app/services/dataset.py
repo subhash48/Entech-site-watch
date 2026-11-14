@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from app.config import Settings
 from app.errors import DataLoadError
 from app.schemas import Reading, Site, Threshold
-from app.services.readings import SITE_ID_RE, evaluate_row, load_rows
+from app.services.readings import SITE_ID_RE, RawRow, evaluate_row, load_rows
 from app.services.thresholds import load_thresholds
 
 
@@ -29,8 +29,13 @@ class Dataset:
 
 def build_dataset(settings: Settings) -> Dataset:
     lookup, warnings = load_thresholds(settings.thresholds_path)
-    rows = load_rows(settings.readings_path)
+    return assemble_dataset(load_rows(settings.readings_path), lookup, warnings)
 
+
+def assemble_dataset(rows: list[RawRow], lookup: dict[str, Threshold], warnings: list[str]) -> Dataset:
+    """Classify raw rows against the thresholds. Used for the starter files and for uploaded versions,
+    so every dataset is evaluated by exactly the same rules."""
+    warnings = list(warnings)
     names: dict[str, str] = {}
     for row in rows:
         if not row.site_id:
